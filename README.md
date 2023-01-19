@@ -1,6 +1,4 @@
 # ECE461TeamAFJK
 
-dummy
-dummy
- dummy
-dummy
+Jack Stavrakos
+
