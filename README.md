@@ -1,5 +1,6 @@
 # ECE461TeamAFJK
 
-dummy
-dummy
+
 Fred Kepler
+# Heath Aaron Lovell
+
