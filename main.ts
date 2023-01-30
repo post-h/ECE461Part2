@@ -15,7 +15,7 @@ let moduleArray : Module[] = [];
 // then we create an array of Module objects with the urls
 for (var url in urlArray)
 {
-    moduleArray.push(new Module(url));
+    moduleArray.push(new Module(urlArray[url]));
     console.log(urlArray[url]);
 }
 
