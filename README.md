@@ -17,3 +17,6 @@ Jack Stavrakos, Kevin Hasier, Fred Kepler, Heath Aaron Lovell
 
 * If you have an error that says "cannot find the name 'process'", run:
     > npm i --save-dev @types/node
+
+* You may need to run the following command to give the 'run' script permission to execute:
+    > chmod u+x run
