@@ -1,0 +1,3 @@
+#!/bin/bash
+tsc main.ts --outDir ./js/
+node ./js/main.js "$1"
