@@ -1,0 +1,33 @@
+#!/bin/bash
+
+if [ "$1" = "help" ]; then
+    echo -e "Command line options are:\n\
+    'install'   - installs any dependencies\n\
+    'build'     - completes all compilation needed\n\
+    'URL_FILE'  - takes in file containing URLs and calculates the scores\n\
+    'test'      - conducts at least 20 distinct test cases"
+
+elif [ "$1" = "install" ]; then
+    npm install octokit > /dev/null 2>&1
+    npm install cloc > /dev/null 2>&1
+    
+    echo "2 dependencies installed..."
+
+elif [ "$1" = "build" ]; then
+    tsc main.ts --outDir ./js/
+
+    echo "Successfully built."
+
+elif [ "$1" = "test" ]; then
+    
+
+    echo "testing"
+
+else
+    # URL_FILE
+    node ./js/main.js "$1"
+
+fi
+
+#tsc main.ts --outDir ./js/
+#node ./js/main.js "$1"
