@@ -19,9 +19,13 @@ elif [ "$1" = "build" ]; then
     echo "Successfully built."
 
 elif [ "$1" = "test" ]; then
-    
+
 
     echo "testing"
+
+elif [ "$1" = "dt" ]; then
+    tsc main.ts --outDir ./js/
+    node ./js/main.js "$1"
 
 else
     # URL_FILE
