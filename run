@@ -19,6 +19,8 @@ elif [ "$1" = "build" ]; then
     echo "Successfully built."
 
 elif [ "$1" = "test" ]; then
+    
+
     echo "testing"
 
 else
