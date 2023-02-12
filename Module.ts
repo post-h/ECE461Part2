@@ -64,7 +64,7 @@ export class Module {
 
     async calcLicensingScore()
     {
-        this.licensing.score = await this.licensing.calcMetric();
+        this.licensing.score = await this.licensing.calcMetric("nodejs", "node");
         console.log(this.licensing.score)
     }
     
