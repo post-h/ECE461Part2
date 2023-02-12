@@ -3,3 +3,6 @@
 /out/*
 sample_url.txt
 convertedURLs.txt
+package-lock.json
+package.json
+

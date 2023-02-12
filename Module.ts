@@ -28,11 +28,13 @@ export class Module {
         //this.repo = regex expression to extract repo from url
         this.netScore = 0;
 
+        // initializes 
+        this.rampUp = new RampUp(_url);
         // initializes each type of metric
         this.rampUp = new RampUp(_url);
         this.correctness = new Correctness(); 
         this.busFactor = new BusFactor();
-        this.responsiveness = new Responsiveness();
+        this.responsiveness = new Responsiveness(this.owner, this.repo);
         this.licensing = new Licensing();
     }
 

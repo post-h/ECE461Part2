@@ -1,7 +1,28 @@
 #!/bin/bash
 
+# Checking LOG_FILE exists
+if [ -f "$LOG_FILE" ]; then
+    # LOG_FILE exists
+    echo "LOG_FILE exists" > /dev/null 2>&1
+else
+    # LOG_FILE doesn't exist
+    touch $LOG_FILE
+fi
+# ---------------------------------------------------------------------------------------------------------------------------
+
+if [ "$LOG_LEVEL" = "0" ]; then
+    echo "NO LOG" > /dev/null 2>&1
+elif [ "$LOG_LEVEL" = "1" ]; then
+    echo "INFO LOG" > /dev/null 2>&1
+elif [ "$LOG_LEVEL" = "2" ]; then
+    echo "DEBUG LOG" > /dev/null 2>&1
+else
+    echo "BAD LOG LEVEL" > /dev/null 2>&1
+fi
+
+
 # Re-writing URL file to change NPM URLs to the GitHub repos
-if [ "$1" != "help" ] & [ "$1" != "install" ] & [ "$1" != "build" ] & [ "$1" != "test" ]; then
+if [ "$1" != "help" ] && [ "$1" != "install" ] && [ "$1" != "build" ] && [ "$1" != "test" ]; then
     rm convertedURLs.txt > /dev/null 2>&1
     touch convertedURLs.txt
 
@@ -26,9 +47,6 @@ if [ "$1" != "help" ] & [ "$1" != "install" ] & [ "$1" != "build" ] & [ "$1" != 
     done < "$1"
 fi
 
-# Creating LOG_FILE
-LOG_FILE=./out/LOG_FILE.txt
-
 if [ "$1" = "help" ]; then
     echo -e "Command line options are:\n\
     'install'   - installs any dependencies\n\
@@ -47,8 +65,9 @@ elif [ "$1" = "install" ]; then
 
     npm install octokit > /dev/null 2>&1
     npm install cloc > /dev/null 2>&1
-    npm install --save-dev @jest/globals
-    npm i --save-dev @types/node
+    npm install --save-dev @jest/globals > /dev/null 2>&1
+    npm i --save-dev @types/node > /dev/null 2>&1
+
 
     echo "4 dependencies installed..."
 
@@ -63,16 +82,12 @@ elif [ "$1" = "test" ]; then
     echo "testing"
 
 else
-    # Check if LOG_FILE exists
-    if [ -f "$LOG_FILE" ]; then
-        # LOG_FILE exists
-        echo "LOG_FILE exists" > /dev/null 2>&1
-    else
-        # LOG_FILE doesn't exists
-        touch ./out/LOG_FILE.txt
-    fi
+    # Run with the converted URL file
+    node ./js/main.js "convertedURLs.txt" "$1"
+
 
     # Run with the converted URL file
     node ./js/main.js "convertedURLs.txt"
-
+    
 fi
+
