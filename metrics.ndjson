@@ -1,0 +1,4 @@
+{"metric":"RAMP_UP_SCORE", "api":"clone", "filepath":"RampUp.ts", "line":43}
+{"metric":"RESPONSIVENESS_SCORE", "api":"rest", "filepath":"GatherData.ts", "line":}
+{"metric":"LICENSING_SCORE", "api":"rest", "filepath":"GatherData.ts", "line":}
+{"metric":"BUS_FACTOR_SCORE", "api":"rest", "filepath":"BusFactor.ts", "line":}
