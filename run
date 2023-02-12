@@ -68,6 +68,7 @@ elif [ "$1" = "install" ]; then
     npm install --save-dev @jest/globals > /dev/null 2>&1
     npm i --save-dev @types/node > /dev/null 2>&1
 
+
     echo "4 dependencies installed..."
 
 elif [ "$1" = "build" ]; then
@@ -81,9 +82,12 @@ elif [ "$1" = "test" ]; then
     echo "testing"
 
 else
-
     # Run with the converted URL file
     node ./js/main.js "convertedURLs.txt" "$1"
 
+
+    # Run with the converted URL file
+    node ./js/main.js "convertedURLs.txt"
+    
 fi
 
