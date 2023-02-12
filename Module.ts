@@ -9,6 +9,8 @@ import { Licensing } from "./Licensing"
 export class Module {
     // private instance variables
     url : string;
+    owner: string;
+    repo: string;
     netScore : number;
     
     rampUp : RampUp;
@@ -22,13 +24,17 @@ export class Module {
     constructor(_url : string)
     {
         this.url = _url;
+        //this.owner = regex expression to extract owner from url
+        //this.repo = regex expression to extract repo from url
         this.netScore = 0;
 
         // initializes 
         this.rampUp = new RampUp(_url);
+        // initializes each type of metric
+        this.rampUp = new RampUp(_url);
         this.correctness = new Correctness(); 
         this.busFactor = new BusFactor();
-        this.responsiveness = new Responsiveness();
+        this.responsiveness = new Responsiveness(this.owner, this.repo);
         this.licensing = new Licensing();
     }
 
@@ -48,9 +54,9 @@ export class Module {
         this.correctness.calcMetric();
     }
 
-    calcBusFactorScore()
+    async calcBusFactorScore()
     {
-        this.busFactor.calcMetric();
+        this.busFactor.score = await this.busFactor.calcMetric();
     }
 
     calcResponsivenessScore()
@@ -58,9 +64,19 @@ export class Module {
         this.responsiveness.calcMetric();
     }
 
-    calcLicensingScore()
+    async calcLicensingScore()
     {
-        this.licensing.calcMetric();
+        this.licensing.score = await this.licensing.calcMetric();
+        console.log(this.licensing.score)
     }
     
+    async calcNetScore() // might have to make this call and await each metric, and then calculate the weighted sum
+    {
+        // add metrics here
+        await this.calcLicensingScore();
+        await this.calcBusFactorScore();
+        this.netScore = this.licensing.score + this.busFactor.score; // add weighting scale to this
+        console.log(this.netScore);
+    }
+
 }
