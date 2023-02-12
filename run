@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Re-writing URL file to change NPM URLs to the GitHub repos
 if [ "$1" != "help" ] & [ "$1" != "install" ] & [ "$1" != "build" ] & [ "$1" != "test" ]; then
     rm convertedURLs.txt > /dev/null 2>&1
     touch convertedURLs.txt
@@ -25,6 +26,9 @@ if [ "$1" != "help" ] & [ "$1" != "install" ] & [ "$1" != "build" ] & [ "$1" != 
     done < "$1"
 fi
 
+# Creating LOG_FILE
+LOG_FILE=./out/LOG_FILE.txt
+
 if [ "$1" = "help" ]; then
     echo -e "Command line options are:\n\
     'install'   - installs any dependencies\n\
@@ -33,10 +37,20 @@ if [ "$1" = "help" ]; then
     'test'      - conducts at least 20 distinct test cases"
 
 elif [ "$1" = "install" ]; then
+    # Ensuring use of correct node version
+    (curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash) > /dev/null 2>&1
+    export NVM_DIR="$HOME/.nvm" > /dev/null 2>&1
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" > /dev/null 2>&1
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" > /dev/null 2>&1
+    nvm install v18.14.0 > /dev/null 2>&1
+    nvm use v18.14.0 > /dev/null 2>&1
+
     npm install octokit > /dev/null 2>&1
     npm install cloc > /dev/null 2>&1
-    
-    echo "2 dependencies installed..."
+    npm install --save-dev @jest/globals
+    npm i --save-dev @types/node
+
+    echo "4 dependencies installed..."
 
 elif [ "$1" = "build" ]; then
     tsc main.ts --outDir ./js/
@@ -49,8 +63,16 @@ elif [ "$1" = "test" ]; then
     echo "testing"
 
 else
-    # URL_FILE
+    # Check if LOG_FILE exists
+    if [ -f "$LOG_FILE" ]; then
+        # LOG_FILE exists
+        echo "LOG_FILE exists" > /dev/null 2>&1
+    else
+        # LOG_FILE doesn't exists
+        touch ./out/LOG_FILE.txt
+    fi
 
+    # Run with the converted URL file
     node ./js/main.js "convertedURLs.txt"
 
 fi
