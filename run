@@ -11,81 +11,222 @@ fi
 # ---------------------------------------------------------------------------------------------------------------------------
 
 if [ "$LOG_LEVEL" = "0" ]; then
-    echo "NO LOG" > /dev/null 2>&1
+    # Re-writing URL file to change NPM URLs to the GitHub repos
+    echo "" > $LOG_FILE
+    if [ "$1" != "help" ] && [ "$1" != "install" ] && [ "$1" != "build" ] && [ "$1" != "test" ]; then
+        rm convertedURLs.txt > /dev/null 2>&1
+        touch convertedURLs.txt
+
+        if [ "$(tail -c 1 "$1")" != "" ]; then
+            echo "" >> "$1"
+        fi
+        
+        while read line; do
+            line="$(echo "$line" | tr -d '\n')"
+            if [[ "$line" == *github* ]]; then
+                echo "$line" >> convertedURLs.txt
+            elif [[ "$line" == *npm* ]]; then
+                npmPackage=$(echo "$line" | python3 -c "import sys; print(sys.stdin.read().split('/')[-1])")
+
+                curURL="https://registry.npmjs.org/$npmPackage"
+
+                (curl "$curURL" | python3 -c "import sys, json; urlArray = json.load(sys.stdin)['repository']['url'].split('/'); \
+                                                            curGitUrl = 'https://github.com/' + urlArray[3] + '/' + urlArray[4].strip('.git'); \
+                                                            urlFile = open('convertedURLs.txt', 'a'); \
+                                                            urlFile.write(curGitUrl + '\n'); urlFile.close()") > /dev/null 2>&1
+            else
+                echo "Invalid URL: $line"
+
+            fi
+        done < "$1"
+    fi
+
+    if [ "$1" = "help" ]; then
+        echo -e "Command line options are:\n\
+        'install'   - installs any dependencies\n\
+        'build'     - completes all compilation needed\n\
+        'URL_FILE'  - takes in file containing URLs and calculates the scores\n\
+        'test'      - conducts at least 20 distinct test cases"
+
+    elif [ "$1" = "install" ]; then
+        # Ensuring use of correct node version
+        (curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash) > /dev/null 2>&1
+        export NVM_DIR="$HOME/.nvm" > /dev/null 2>&1
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" > /dev/null 2>&1
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" > /dev/null 2>&1
+        nvm install v18.14.0 > /dev/null 2>&1
+        nvm use v18.14.0 > /dev/null 2>&1
+
+        npm install octokit > /dev/null 2>&1
+        #npm install cloc > /dev/null 2>&1
+        npm install --save-dev @jest/globals > /dev/null 2>&1
+        npm i --save-dev @types/node > /dev/null 2>&1
+
+        echo "3 dependencies installed..."
+
+    elif [ "$1" = "build" ]; then
+        tsc main.ts --outDir ./js/
+
+        echo "Successfully built."
+
+    elif [ "$1" = "test" ]; then
+        tsc test.ts --outDir ./js/
+        node ./js/test.js
+
+
+    else
+        # Run with the converted URL file
+        rm -rf ./clone/
+        
+        node ./js/main.js "convertedURLs.txt" "$1"
+
+    fi
 elif [ "$LOG_LEVEL" = "1" ]; then
-    echo "INFO LOG" > /dev/null 2>&1
+    # Re-writing URL file to change NPM URLs to the GitHub repos
+    echo "" > $LOG_FILE
+    if [ "$1" != "help" ] && [ "$1" != "install" ] && [ "$1" != "build" ] && [ "$1" != "test" ]; then
+        rm convertedURLs.txt > /dev/null 2>&1
+        touch convertedURLs.txt
+
+        if [ "$(tail -c 1 "$1")" != "" ]; then
+            echo "" >> "$1"
+        fi
+        
+        while read line; do
+            line="$(echo "$line" | tr -d '\n')"
+            if [[ "$line" == *github* ]]; then
+                echo "$line" >> convertedURLs.txt
+            elif [[ "$line" == *npm* ]]; then
+                npmPackage=$(echo "$line" | python3 -c "import sys; print(sys.stdin.read().split('/')[-1])")
+
+                curURL="https://registry.npmjs.org/$npmPackage"
+
+                (curl "$curURL" | python3 -c "import sys, json; urlArray = json.load(sys.stdin)['repository']['url'].split('/'); \
+                                                            curGitUrl = 'https://github.com/' + urlArray[3] + '/' + urlArray[4].strip('.git'); \
+                                                            urlFile = open('convertedURLs.txt', 'a'); \
+                                                            urlFile.write(curGitUrl + '\n'); urlFile.close()") > /dev/null 2>&1
+            else
+                echo "Invalid URL: $line"
+
+            fi
+        done < "$1"
+    fi
+
+    if [ "$1" = "help" ]; then
+        echo -e "Command line options are:\n\
+        'install'   - installs any dependencies\n\
+        'build'     - completes all compilation needed\n\
+        'URL_FILE'  - takes in file containing URLs and calculates the scores\n\
+        'test'      - conducts at least 20 distinct test cases"
+
+    elif [ "$1" = "install" ]; then
+        # Ensuring use of correct node version
+        (curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash) >> $LOG_FILE 2>&1
+        export NVM_DIR="$HOME/.nvm" >> $LOG_FILE
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" >> $LOG_FILE
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" >> $LOG_FILE
+        nvm install v18.14.0 >> $LOG_FILE 2>&1
+        nvm use v18.14.0 >> $LOG_FILE 2>&1
+
+        npm install octokit >> $LOG_FILE
+        #npm install cloc > /dev/null 2>&1
+        npm install --save-dev @jest/globals >> $LOG_FILE
+        npm i --save-dev @types/node >> $LOG_FILE
+
+        echo "3 dependencies installed..."
+
+    elif [ "$1" = "build" ]; then
+        tsc main.ts --outDir ./js/
+
+        echo "Successfully built."
+
+    elif [ "$1" = "test" ]; then
+        tsc test.ts --outDir ./js/
+        node ./js/test.js
+
+
+    else
+        # Run with the converted URL file
+        rm -rf ./clone/
+        
+        node ./js/main.js "convertedURLs.txt" "$1"
+
+    fi
 elif [ "$LOG_LEVEL" = "2" ]; then
-    echo "DEBUG LOG" > /dev/null 2>&1
+    echo "" > $LOG_FILE
+    # Re-writing URL file to change NPM URLs to the GitHub repos
+    if [ "$1" != "help" ] && [ "$1" != "install" ] && [ "$1" != "build" ] && [ "$1" != "test" ]; then
+        rm convertedURLs.txt > /dev/null 2>&1
+        touch convertedURLs.txt
+
+        if [ "$(tail -c 1 "$1")" != "" ]; then
+            echo "" >> "$1"
+        fi
+        
+        while read line; do
+            line="$(echo "$line" | tr -d '\n')"
+            if [[ "$line" == *github* ]]; then
+                echo "$line" >> convertedURLs.txt
+            elif [[ "$line" == *npm* ]]; then
+                npmPackage=$(echo "$line" | python3 -c "import sys; print(sys.stdin.read().split('/')[-1])")
+
+                curURL="https://registry.npmjs.org/$npmPackage"
+
+                (curl "$curURL" | python3 -c "import sys, json; urlArray = json.load(sys.stdin)['repository']['url'].split('/'); \
+                                                            curGitUrl = 'https://github.com/' + urlArray[3] + '/' + urlArray[4].strip('.git'); \
+                                                            urlFile = open('convertedURLs.txt', 'a'); \
+                                                            urlFile.write(curGitUrl + '\n'); urlFile.close()") > /dev/null 2>&1
+            else
+                echo "Invalid URL: $line"
+
+            fi
+        done < "$1"
+    fi
+
+    if [ "$1" = "help" ]; then
+        echo -e "Command line options are:\n\
+        'install'   - installs any dependencies\n\
+        'build'     - completes all compilation needed\n\
+        'URL_FILE'  - takes in file containing URLs and calculates the scores\n\
+        'test'      - conducts at least 20 distinct test cases"
+
+    elif [ "$1" = "install" ]; then
+        # Ensuring use of correct node version
+        (curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash) >> $LOG_FILE 2>&1
+        export NVM_DIR="$HOME/.nvm" >> $LOG_FILE 2>&1
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" >> $LOG_FILE 2>&1
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" >> $LOG_FILE 2>&1
+        nvm install v18.14.0 >> $LOG_FILE 2>&1
+        nvm use v18.14.0 >> $LOG_FILE 2>&1
+
+        npm install octokit >> $LOG_FILE 2>&1
+        #npm install cloc > /dev/null 2>&1
+        npm install --save-dev @jest/globals >> $LOG_FILE 2>&1
+        npm i --save-dev @types/node >> $LOG_FILE 2>&1
+
+        echo "3 dependencies installed..."
+
+    elif [ "$1" = "build" ]; then
+        tsc main.ts --outDir ./js/
+
+        echo "Successfully built."
+
+    elif [ "$1" = "test" ]; then
+        tsc test.ts --outDir ./js/
+        node ./js/test.js
+
+
+    else
+        # Run with the converted URL file
+        rm -rf ./clone/
+        
+        node ./js/main.js "convertedURLs.txt" "$1"
+
+    fi
 else
     echo "BAD LOG LEVEL" > /dev/null 2>&1
 fi
 
 
-# Re-writing URL file to change NPM URLs to the GitHub repos
-if [ "$1" != "help" ] && [ "$1" != "install" ] && [ "$1" != "build" ] && [ "$1" != "test" ]; then
-    rm convertedURLs.txt > /dev/null 2>&1
-    touch convertedURLs.txt
 
-    if [ "$(tail -c 1 "$1")" != "" ]; then
-        echo "" >> "$1"
-    fi
-    
-    while read line; do
-        line="$(echo "$line" | tr -d '\n')"
-        if [[ "$line" == *github* ]]; then
-            echo "$line" >> convertedURLs.txt
-        else
-            npmPackage=$(echo "$line" | python3 -c "import sys; print(sys.stdin.read().split('/')[-1])")
-
-            curURL="https://registry.npmjs.org/$npmPackage"
-
-            (curl "$curURL" | python3 -c "import sys, json; urlArray = json.load(sys.stdin)['repository']['url'].split('/'); \
-                                                        curGitUrl = 'https://github.com/' + urlArray[3] + '/' + urlArray[4].strip('.git'); \
-                                                        urlFile = open('convertedURLs.txt', 'a'); \
-                                                        urlFile.write(curGitUrl + '\n'); urlFile.close()") > /dev/null 2>&1
-
-        fi
-    done < "$1"
-fi
-
-if [ "$1" = "help" ]; then
-    echo -e "Command line options are:\n\
-    'install'   - installs any dependencies\n\
-    'build'     - completes all compilation needed\n\
-    'URL_FILE'  - takes in file containing URLs and calculates the scores\n\
-    'test'      - conducts at least 20 distinct test cases"
-
-elif [ "$1" = "install" ]; then
-    # Ensuring use of correct node version
-    (curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash) > /dev/null 2>&1
-    export NVM_DIR="$HOME/.nvm" > /dev/null 2>&1
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" > /dev/null 2>&1
-    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" > /dev/null 2>&1
-    nvm install v18.14.0 > /dev/null 2>&1
-    nvm use v18.14.0 > /dev/null 2>&1
-
-    npm install octokit > /dev/null 2>&1
-    npm install cloc > /dev/null 2>&1
-    npm install --save-dev @jest/globals > /dev/null 2>&1
-    npm i --save-dev @types/node > /dev/null 2>&1
-
-    echo "4 dependencies installed..."
-
-elif [ "$1" = "build" ]; then
-    tsc main.ts --outDir ./js/
-
-    echo "Successfully built."
-
-elif [ "$1" = "test" ]; then
-    tsc test.ts --outDir ./js/
-    node ./js/test.js
-
-
-else
-    # Run with the converted URL file
-    rm -rf ./clone/
-    
-    node ./js/main.js "convertedURLs.txt" "$1"
-
-fi
 

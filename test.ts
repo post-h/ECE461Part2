@@ -11,8 +11,6 @@ function _test_rampUp_easy(tests_passed:number) {
         tests_passed++;
     }
 
-    console.log("RUE %d\n", output);
-
     return tests_passed;
 }
 
@@ -25,8 +23,6 @@ function _test_rampUp_medium(tests_passed:number) {
     if (output == 0.3) {
         tests_passed++;
     }
-
-    console.log("RUM %d\n", output);
 
     return tests_passed;
 }
@@ -41,8 +37,6 @@ function _test_rampUp_hard(tests_passed:number) {
         tests_passed++;
     }
 
-    console.log("RUH %d\n", output);
-
     return tests_passed;
 }
 
@@ -56,7 +50,18 @@ function _test_rampUp_edge(tests_passed:number) {
         tests_passed++;
     }
 
-    console.log("RUED %d\n", output);
+    return tests_passed;
+}
+
+function _test_rampUp_edge2(tests_passed:number) {
+    let module = new Module("https://github.com/jonrandoem/eyeos");
+
+    let output = module.calcRampUpScore();
+    output = +(output.toFixed(1));
+
+    if (output == 0.7) {
+        tests_passed++;
+    }
 
     return tests_passed;
 }
@@ -73,8 +78,6 @@ async function _test_BusFactor_easy(tests_passed:number) {
         tests_passed++;
     }
 
-    console.log("BFE %d\n", output);
-
     return tests_passed;
 }
 
@@ -88,8 +91,6 @@ async function _test_BusFactor_medium(tests_passed:number) {
     if (output == 0.4) {
         tests_passed++;
     }
-
-    console.log("BFM %d\n", output);
     
     return tests_passed;
 }
@@ -104,8 +105,6 @@ async function _test_BusFactor_hard(tests_passed:number) {
     if (output == 0.5) {
         tests_passed++;
     }
-
-    console.log("BFH %d\n", output);
     
     return tests_passed;
 }
@@ -120,8 +119,20 @@ async function _test_BusFactor_edge(tests_passed:number) {
     if (output == 0.0) {
         tests_passed++;
     }
+    
+    return tests_passed;
+}
 
-    console.log("BFED %d\n", output);
+async function _test_BusFactor_edge2(tests_passed:number) {
+    let module = new Module("https://github.com/jonrandoem/eyeos");
+
+    await module.calcBusFactorScore();
+    let output = module.busFactor.score;
+    output = +(output.toFixed(1));
+
+    if (output == 0.0) {
+        tests_passed++;
+    }
     
     return tests_passed;
 }
@@ -138,8 +149,6 @@ async function _test_Responsiveness_easy(tests_passed:number) {
         tests_passed++;
     }
 
-    console.log("RE %d\n", output);
-
     return tests_passed;
 }
 
@@ -153,8 +162,6 @@ async function _test_Responsiveness_medium(tests_passed:number) {
     if (output == 0.0) {
         tests_passed++;
     }
-
-    console.log("RM %d\n", output);
 
     return tests_passed;
 }
@@ -170,8 +177,6 @@ async function _test_Responsiveness_hard(tests_passed:number) {
         tests_passed++;
     }
 
-    console.log("RH %d\n", output);
-
     return tests_passed;
 }
 
@@ -186,7 +191,19 @@ async function _test_Responsiveness_edge(tests_passed:number) {
         tests_passed++;
     }
 
-    console.log("RED %d\n", output);
+    return tests_passed;
+}
+
+async function _test_Responsiveness_edge2(tests_passed:number) {
+    let module = new Module("https://github.com/jonrandoem/eyeos");
+
+    await module.calcResponsivenessScore();
+    let output = module.responsiveness.score;
+    output = +(output.toFixed(1));
+
+    if (output == 0.0) {
+        tests_passed++;
+    }
 
     return tests_passed;
 }
@@ -201,8 +218,6 @@ async function _test_Licensing_easy(tests_passed:number) {
         tests_passed++;
     }
 
-    console.log("LE %d\n", module.licensing.score);
-
     return tests_passed;
 }
 
@@ -214,8 +229,6 @@ async function _test_Licensing_medium(tests_passed:number) {
     if(module.licensing.score == 1) {
         tests_passed++;
     }
-
-    console.log("LM %d\n", module.licensing.score);
 
     return tests_passed;
 }
@@ -229,8 +242,6 @@ async function _test_Licensing_hard(tests_passed:number) {
         tests_passed++;
     }
 
-    console.log("LH %d\n", module.licensing.score);
-
     return tests_passed;
 }
 
@@ -243,7 +254,17 @@ async function _test_Licensing_edge(tests_passed:number) {
         tests_passed++;
     }
 
-    console.log("LED %d\n", module.licensing.score);
+    return tests_passed;
+}
+
+async function _test_Licensing_edge2(tests_passed:number) {
+    let module = new Module("https://github.com/jonrandoem/eyeos");
+
+    await module.calcLicensingScore();
+
+    if(module.licensing.score == 0) {
+        tests_passed++;
+    }
 
     return tests_passed;
 }
@@ -276,21 +297,25 @@ async function main(tests_passed:number) {
     tests_passed = _test_rampUp_medium(tests_passed);
     tests_passed = _test_rampUp_hard(tests_passed);
     tests_passed = _test_rampUp_edge(tests_passed);
+    tests_passed = _test_rampUp_edge2(tests_passed);
 
     tests_passed = await _test_BusFactor_easy(tests_passed);
     tests_passed = await _test_BusFactor_medium(tests_passed);
     tests_passed = await _test_BusFactor_hard(tests_passed);
     tests_passed = await _test_BusFactor_edge(tests_passed);
+    tests_passed = await _test_BusFactor_edge2(tests_passed);
 
     tests_passed = await _test_Responsiveness_easy(tests_passed);
     tests_passed = await _test_Responsiveness_medium(tests_passed);
     tests_passed = await _test_Responsiveness_hard(tests_passed);
     tests_passed = await _test_Responsiveness_edge(tests_passed);
+    tests_passed = await _test_Responsiveness_edge2(tests_passed);
 
     tests_passed = await _test_Licensing_easy(tests_passed);
     tests_passed = await _test_Licensing_medium(tests_passed);
     tests_passed = await _test_Licensing_hard(tests_passed);
     tests_passed = await _test_Licensing_edge(tests_passed);
+    tests_passed = await _test_Licensing_edge2(tests_passed);
 
     // tests_passed = _test_Main_easy(tests_passed);
     // tests_passed = _test_Main_medium(tests_passed);
@@ -299,8 +324,8 @@ async function main(tests_passed:number) {
 
     console.log('Total: 20');
     console.log('Passed: %d', tests_passed);
-    // console.log('Coverage: %d%', coverage);
-    // console.log('%d/20 test cases passed. %d% line coverage achieved.', tests_passed, coverage);
+    console.log('Coverage: %d%', -1);
+    console.log('%d/20 test cases passed. %d% line coverage achieved.', tests_passed, -1);
 
     return 1;
 }
