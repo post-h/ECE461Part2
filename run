@@ -29,8 +29,9 @@ if [ "$1" != "help" ] && [ "$1" != "install" ] && [ "$1" != "build" ] && [ "$1" 
     if [ "$(tail -c 1 "$1")" != "" ]; then
         echo "" >> "$1"
     fi
-
+    
     while read line; do
+        line="$(echo "$line" | tr -d '\n')"
         if [[ "$line" == *github* ]]; then
             echo "$line" >> convertedURLs.txt
         else
@@ -81,8 +82,9 @@ elif [ "$1" = "test" ]; then
 
 
 else
-
     # Run with the converted URL file
+    rm -rf ./clone/
+    
     node ./js/main.js "convertedURLs.txt" "$1"
 
 fi

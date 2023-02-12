@@ -33,22 +33,66 @@ urlArray = convertedURLFile.split('\n');
 const initialURLFile = fs.readFileSync(initialURLs, 'utf-8');
 initialURLArray = initialURLFile.split('\n');
 
+urlArray.pop();
+
 // then we create an array of Module objects with the urls
 for (var url in urlArray)
 {
     moduleArray.push(new Module(urlArray[url]));
-    console.log(urlArray[url]);
+    //console.log(urlArray[url]);
+}
+
+async function calcScores(curModule : Module) {
+    await curModule.calcBusFactorScore();
+    await curModule.calcResponsivenessScore();
+    await curModule.calcLicensingScore();
 }
 
 // then for each module, we go through calculating each score
-for (var module in moduleArray)
-{
-    moduleArray[module].calcRampUpScore();
-    moduleArray[module].calcCorrectnessScore();
-//    moduleArray[module].calcBusFactorScore();
-    moduleArray[module].calcResponsivenessScore();
-//    moduleArray[module].calcLicensingScore();
+// for (var module in moduleArray)
+// {
+//     moduleArray[module].calcRampUpScore();
+//     //moduleArray[module].calcCorrectnessScore();
+//     // moduleArray[module].calcBusFactorScore();
+//     // moduleArray[module].calcResponsivenessScore();
+//     // moduleArray[module].calcLicensingScore();
 
-    moduleArray[module].calcNetScore();
-//    console.log(moduleArray[module].netScore);
+//     calcScores(moduleArray[module]);
+
+//     moduleArray[module].calcNetScore();
+//     // console.log(moduleArray[module].netScore);
+// }
+
+async function printOutput() {
+    for (var module in moduleArray)
+    {
+        await moduleArray[module].calcRampUpScore();
+        //moduleArray[module].calcCorrectnessScore();
+        await moduleArray[module].calcBusFactorScore();
+        await moduleArray[module].calcResponsivenessScore();
+        await moduleArray[module].calcLicensingScore();
+
+        // calcScores(moduleArray[module]);
+
+        await moduleArray[module].calcNetScore();
+        // console.log(moduleArray[module].netScore);
+    }
+
+    for (let i = 0; i < moduleArray.length; i++) {
+        for(let j = 0; j < moduleArray.length - i - 1; j++) {
+            if(moduleArray[j].netScore < moduleArray[j + 1].netScore) {
+                [moduleArray[j],moduleArray[j+1]] = [moduleArray[j+1],moduleArray[j]];
+                [initialURLArray[j],initialURLArray[j+1]] = [initialURLArray[j+1],initialURLArray[j]];
+            }
+        }
+    }
+
+    for (var module in moduleArray) {
+        console.log("{\"URL\":\"%s\", \"NET_SCORE\":%s, \"RAMP_UP_SCORE\":%s, \"CORRECTNESS_SCORE\":-1, \"BUS_FACTOR\":%s, \"RESPONSIVE_MAINTAINER_SCORE\":%s, \"LICENSE_SCORE\":%s}", initialURLArray[module], moduleArray[module].netScore.toFixed(2), moduleArray[module].rampUpScore.toFixed(2), moduleArray[module].busFactor.score.toFixed(2), moduleArray[module].responsiveness.score.toFixed(2), moduleArray[module].licensing.score.toFixed(2)); 
+    }
 }
+async function main() {
+    await printOutput();
+}
+
+main();

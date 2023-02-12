@@ -21,6 +21,7 @@ export class Module {
     
     rampUpScore: number;
     correctnessScore: number;
+    busFactorScore: number;
     responsivenessScore: number;
     licensingScore: number;
 
@@ -29,7 +30,7 @@ export class Module {
     {
         this.url = _url;
         this.owner = this.url.split('/')[3];                   // gets owner where owner is equal to expressjs in test
-        this.repo = this.url.split('/')[4].split(".")[0];      // gets repo where repo is equal to express in test
+        this.repo = this.url.split('/')[4];      // gets repo where repo is equal to express in test
         this.netScore = 0;
 
         // initializes each type of metric
@@ -81,7 +82,7 @@ export class Module {
         await this.calcLicensingScore();
         await this.calcBusFactorScore();
         this.netScore = Math.min(this.licensing.score, ((0.2 * this.rampUpScore) + (0.5 * this.responsiveness.score) + (0.3 * this.busFactor.score))); // add weighting scale to this
-        console.log(this.netScore);
+        //console.log(this.netScore);
     }
 
 }
