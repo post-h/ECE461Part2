@@ -52,9 +52,9 @@ export class Module {
         this.correctness.calcMetric();
     }
 
-    calcBusFactorScore()
+    async calcBusFactorScore()
     {
-        this.busFactor.calcMetric();
+        this.busFactor.score = await this.busFactor.calcMetric();
     }
 
     calcResponsivenessScore()
@@ -72,7 +72,8 @@ export class Module {
     {
         // add metrics here
         await this.calcLicensingScore();
-        this.netScore = this.licensing.score + 0.5;
+        await this.calcBusFactorScore();
+        this.netScore = this.licensing.score + this.busFactor.score; // add weighting scale to this
         console.log(this.netScore);
     }
 

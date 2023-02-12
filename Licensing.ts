@@ -6,10 +6,8 @@ export class Licensing {//implements Metric{
 
     calcMetric() : Promise<number>
     {
-        console.log("Calculating licensing score");
-         
-        let value : Promise<number> = calc();
-        return value;
+        //console.log("Calculating licensing score");
+        return calc();
     }
 }
 

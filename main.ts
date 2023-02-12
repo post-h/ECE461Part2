@@ -42,7 +42,7 @@ for (var module in moduleArray)
 {
     moduleArray[module].calcRampUpScore();
     moduleArray[module].calcCorrectnessScore();
-    moduleArray[module].calcBusFactorScore();
+//    moduleArray[module].calcBusFactorScore();
     moduleArray[module].calcResponsivenessScore();
 //    moduleArray[module].calcLicensingScore();
 
