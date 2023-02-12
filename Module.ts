@@ -25,7 +25,7 @@ export class Module {
         this.netScore = 0;
 
         // initializes 
-        this.rampUp = new RampUp();
+        this.rampUp = new RampUp(_url);
         this.correctness = new Correctness(); 
         this.busFactor = new BusFactor();
         this.responsiveness = new Responsiveness();
