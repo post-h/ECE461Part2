@@ -31,12 +31,12 @@ export class RampUp implements Metric{
         if(score > 1) { // cap score at 1
             score = 1;
         }
+        //console.log(score);
         return score;
     }
 }
 
 function conductRampUp(url : string): number {
-
     // For some reason, git clone logs the message "Cloning into './clone'..." as stderr
     // so keep that in mind if changes happen here.
     // Clone url repo
@@ -44,6 +44,8 @@ function conductRampUp(url : string): number {
 
     // Run cloc on directory and create cloc_output.sql SQL database file with stdout of cloc
     const cloc_out = spawnSync('perl', ['cloc-1.96.pl', '--sql', '1', './clone']);
+
+    //console.log(cloc_out.stdout.toString());
 
     writeFileSync('./clone/cloc_output.sql', cloc_out.stdout);
 
@@ -70,6 +72,7 @@ function conductRampUp(url : string): number {
     // Subtract markdown sum from code and add to comments to account for REAME.md files
     //CodeSum -= markdownSum;
     //CommentSum += markdownSum;
+
 
     // Create ratio between comments and code
     var ratio : number = CommentSum / CodeSum;
