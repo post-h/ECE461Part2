@@ -52,9 +52,9 @@ export class Module {
         this.correctness.calcMetric();
     }
 
-    calcBusFactorScore()
+    async calcBusFactorScore()
     {
-        this.busFactor.calcMetric();
+        this.busFactor.score = await this.busFactor.calcMetric();
     }
 
     calcResponsivenessScore()
@@ -65,12 +65,16 @@ export class Module {
     async calcLicensingScore()
     {
         this.licensing.score = await this.licensing.calcMetric();
-        //console.log(this.licensing.score)
+        console.log(this.licensing.score)
     }
     
-    async calcNetScore()
+    async calcNetScore() // might have to make this call and await each metric, and then calculate the weighted sum
     {
-        this.netScore = this.licensing.score + 0.5;
+        // add metrics here
+        await this.calcLicensingScore();
+        await this.calcBusFactorScore();
+        this.netScore = this.licensing.score + this.busFactor.score; // add weighting scale to this
+        console.log(this.netScore);
     }
 
 }
