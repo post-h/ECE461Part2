@@ -14,21 +14,27 @@ import { exit } from "process";
 import { fileURLToPath } from 'url';
 
 // example: array of URLs --> assuming we read in the input file as strings
-let urlArray : string[] = [ "www.mockurl1.com", "www.pretendurl.com", "www.testingurl.com" ];
+//let urlArray : string[] = [ "www.mockurl1.com", "www.pretendurl.com", "www.testingurl.com" ];
+let urlArray : string[];
+let initialURLArray : string[] = [ "" ];
 let moduleArray : Module[] = [];
 
 // get command line flags
 const argv = process.argv.slice(2)
 
-let flag = argv[0];
-
-console.log(urlArray);
+let convertedURLs = argv[0];
+let initialURLs = argv[1];
 
 // how to read file in as array
 //const urlFile = fs.readFileSync('./sample_url.txt', 'utf-8');   // tested using sample url file
-const urlFile = fs.readFileSync(flag, 'utf-8');                 // this uses the flag passed through in 'run' for the destination of the file    
-urlArray = urlFile.split('\n');
-console.log(urlArray);
+const convertedURLFile = fs.readFileSync(convertedURLs, 'utf-8');                 // this uses the flag passed through in 'run' for the destination of the file    
+urlArray = convertedURLFile.split('\n');
+
+const initialURLFile = fs.readFileSync(initialURLs, 'utf-8');
+initialURLArray = initialURLFile.split('\n');
+
+console.log(urlArray)
+console.log(initialURLArray)
 
 // then we create an array of Module objects with the urls
 for (var url in urlArray)
