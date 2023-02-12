@@ -31,7 +31,7 @@ async function calc(_owner: string, _repo: string) : Promise<number>
     const response = await fetch("https://api.github.com/graphql", {
         method: "POST",
     headers: {
-        Authorization: `Token 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`,
+        Authorization: `Token ${process.env.GITHUB_TOKEN}`,
     },
     body: JSON.stringify({ query: gql_query }),
     });
