@@ -65,12 +65,15 @@ export class Module {
     async calcLicensingScore()
     {
         this.licensing.score = await this.licensing.calcMetric();
-        //console.log(this.licensing.score)
+        console.log(this.licensing.score)
     }
     
-    async calcNetScore()
+    async calcNetScore() // might have to make this call and await each metric, and then calculate the weighted sum
     {
+        // add metrics here
+        await this.calcLicensingScore();
         this.netScore = this.licensing.score + 0.5;
+        console.log(this.netScore);
     }
 
 }

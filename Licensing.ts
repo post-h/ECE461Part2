@@ -18,9 +18,9 @@ export class Licensing {//implements Metric{
 
 async function calc() : Promise<number>
 {
-    let license : string = await getLicense("jonrandoem", "eyeos");
-    console.log(license);
-    if(license === "GNU Lesser General Public License v2.1")
+    let license : string = await getLicense("nodejs", "node");
+    //console.log(license);
+    if(license === "GNU Lesser General Public License v2.1" || license === "GNU Lesser General Public v2.0" || license === "GNU Lesser General Public v3.0" || license === "MIT License" || license === "Other")
     {
         return 1;
     }
