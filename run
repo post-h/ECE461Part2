@@ -1,5 +1,30 @@
 #!/bin/bash
 
+if [ "$1" != "help" ] & [ "$1" != "install" ] & [ "$1" != "build" ] & [ "$1" != "test" ]; then
+    rm convertedURLs.txt > /dev/null 2>&1
+    touch convertedURLs.txt
+
+    if [ "$(tail -c 1 "$1")" != "" ]; then
+        echo "" >> "$1"
+    fi
+
+    while read line; do
+        if [[ "$line" == *github* ]]; then
+            echo "$line" >> convertedURLs.txt
+        else
+            npmPackage=$(echo "$line" | python3 -c "import sys; print(sys.stdin.read().split('/')[-1])")
+
+            curURL="https://registry.npmjs.org/$npmPackage"
+
+            (curl "$curURL" | python3 -c "import sys, json; urlArray = json.load(sys.stdin)['repository']['url'].split('/'); \
+                                                        curGitUrl = 'https://github.com/' + urlArray[3] + '/' + urlArray[4].strip('.git'); \
+                                                        urlFile = open('convertedURLs.txt', 'a'); \
+                                                        urlFile.write(curGitUrl + '\n'); urlFile.close()") > /dev/null 2>&1
+
+        fi
+    done < "$1"
+fi
+
 if [ "$1" = "help" ]; then
     echo -e "Command line options are:\n\
     'install'   - installs any dependencies\n\
@@ -23,15 +48,9 @@ elif [ "$1" = "test" ]; then
 
     echo "testing"
 
-elif [ "$1" = "dt" ]; then
-    tsc main.ts --outDir ./js/
-    node ./js/main.js "$1"
-
 else
     # URL_FILE
-    node ./js/main.js "$1"
+
+    node ./js/main.js "convertedURLs.txt"
 
 fi
-
-#tsc main.ts --outDir ./js/
-#node ./js/main.js "$1"
