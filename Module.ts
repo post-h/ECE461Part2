@@ -80,7 +80,7 @@ export class Module {
         // add metrics here
         await this.calcLicensingScore();
         await this.calcBusFactorScore();
-        this.netScore = this.licensing.score + this.busFactor.score; // add weighting scale to this
+        this.netScore = Math.min(this.licensing.score, ((0.2 * this.rampUpScore) + (0.5 * this.responsiveness.score) + (0.3 * this.busFactor.score))); // add weighting scale to this
         console.log(this.netScore);
     }
 
