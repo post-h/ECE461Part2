@@ -1,5 +1,4 @@
 import { Metric } from "./Metric";
-import { getLicense } from "./GatherData";
 
 export class Licensing {//implements Metric{
     score : number = 0;
