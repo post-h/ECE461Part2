@@ -33,9 +33,6 @@ urlArray = convertedURLFile.split('\n');
 const initialURLFile = fs.readFileSync(initialURLs, 'utf-8');
 initialURLArray = initialURLFile.split('\n');
 
-console.log(urlArray)
-console.log(initialURLArray)
-
 // then we create an array of Module objects with the urls
 for (var url in urlArray)
 {

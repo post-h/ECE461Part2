@@ -19,23 +19,25 @@ export class Module {
     responsiveness : Responsiveness;
     licensing : Licensing;
     
+    rampUpScore: number;
+    correctnessScore: number;
+    responsivenessScore: number;
+    licensingScore: number;
 
     // constructor
     constructor(_url : string)
     {
         this.url = _url;
-        //this.owner = regex expression to extract owner from url
-        //this.repo = regex expression to extract repo from url
+        this.owner = this.url.split('/')[3];                   // gets owner where owner is equal to expressjs in test
+        this.repo = this.url.split('/')[4].split(".")[0];      // gets repo where repo is equal to express in test
         this.netScore = 0;
 
-        // initializes 
-        this.rampUp = new RampUp(_url);
         // initializes each type of metric
         this.rampUp = new RampUp(_url);
         this.correctness = new Correctness(); 
-        this.busFactor = new BusFactor();
+        this.busFactor = new BusFactor(this.owner, this.repo);
         this.responsiveness = new Responsiveness(this.owner, this.repo);
-        this.licensing = new Licensing();
+        this.licensing = new Licensing(this.owner, this.repo);
     }
 
     // methods
@@ -46,12 +48,15 @@ export class Module {
 
     calcRampUpScore()
     {
-        this.rampUp.calcMetric();
+        this.rampUpScore = this.rampUp.calcMetric(); 
+        return this.rampUpScore;
     }
 
     calcCorrectnessScore()
     {
-        this.correctness.calcMetric();
+        this.correctnessScore = -1;
+        // this.correctness.calcMetric();
+        return this.correctnessScore;
     }
 
     async calcBusFactorScore()
@@ -59,15 +64,15 @@ export class Module {
         this.busFactor.score = await this.busFactor.calcMetric();
     }
 
-    calcResponsivenessScore()
+    async calcResponsivenessScore()
     {
-        this.responsiveness.calcMetric();
+        this.responsiveness.score = await this.responsiveness.calcMetric();
+        
     }
 
     async calcLicensingScore()
     {
         this.licensing.score = await this.licensing.calcMetric();
-        console.log(this.licensing.score)
     }
     
     async calcNetScore() // might have to make this call and await each metric, and then calculate the weighted sum

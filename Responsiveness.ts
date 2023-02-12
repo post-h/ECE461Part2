@@ -11,13 +11,19 @@ import { calcMaintainers } from "./GatherData";
 
 
 export class Responsiveness { // implements Metric{
-    constructor(public owner:string, public repo:string) {
+    score : number = 0;
+
+    constructor(public owner: string, public repo: string) {
     }
 
     calcMetric() : Promise<number>
     {
-        let score:Promise<number> = calcMaintainers(this.owner, this.repo);
-
-        return score;
+        return calc(this.owner, this.repo);
     }
+}
+
+async function calc(owner : string, repo : string) : Promise<number>
+{
+    let responsivenessScore = await calcMaintainers(owner, repo);
+    return responsivenessScore;
 }

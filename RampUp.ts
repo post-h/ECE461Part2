@@ -56,7 +56,7 @@ function conductRampUp(url : string): number {
     // but should be logged as comments since it used to inform 
     // stdout_sqlite.stdout.toString() returns string in form of sum(nCode)|sum(nComment)
     const stdout_sqlite = spawnSync('sqlite3', ['./clone/code.db', 'select sum(nCode), sum(nComment) from t']);
-    const stdout_markdown = spawnSync('sqlite3', ['./clone/code.db', 'select nCode from t where language="Markdown"']);
+    //const stdout_markdown = spawnSync('sqlite3', ['./clone/code.db', 'select sum(nCode) from t where language="Markdown"']);
 
     // Splits string using | as delimiter
     var split_str : string[] = stdout_sqlite.stdout.toString().split("|", 2);
@@ -65,11 +65,11 @@ function conductRampUp(url : string): number {
     // i.e. turns string "5" into number 5
     var CodeSum : number = +(split_str[0]);
     var CommentSum : number = +(split_str[1]);
-    var markdownSum : number = +(stdout_markdown.stdout.toString());
+    //var markdownSum : number = +(stdout_markdown.stdout.toString());
 
     // Subtract markdown sum from code and add to comments to account for REAME.md files
-    CodeSum -= markdownSum;
-    CommentSum += markdownSum;
+    //CodeSum -= markdownSum;
+    //CommentSum += markdownSum;
 
     // Create ratio between comments and code
     var ratio : number = CommentSum / CodeSum;

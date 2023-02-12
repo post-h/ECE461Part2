@@ -77,9 +77,9 @@ elif [ "$1" = "build" ]; then
     echo "Successfully built."
 
 elif [ "$1" = "test" ]; then
+    tsc test.ts --outDir ./js/
+    node ./js/test.js
 
-
-    echo "testing"
 
 else
     # Run with the converted URL file
