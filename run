@@ -222,11 +222,10 @@ elif [ "$LOG_LEVEL" = "2" ]; then
         
         node ./js/main.js "convertedURLs.txt" "$1"
 
-    fi
+fi
 else
     echo "BAD LOG LEVEL" > /dev/null 2>&1
 fi
-
 
 
 
