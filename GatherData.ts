@@ -1,7 +1,8 @@
 import { Octokit } from "octokit";
+import { environment } from './environment/environment';
 
 const octokit = new Octokit({
-    auth: process.env.GITHUB_TOKEN,  // change to your token for now,  I will figure out how to get to use the environment variable soon
+    auth: environment.GITHUB_TOKEN,  // change to your token for now,  I will figure out how to get to use the environment variable soon
     userAgent: 'testing',
     timeZone: "Eastern",
     baseUrl: 'https://api.github.com',
@@ -14,7 +15,7 @@ export async function getLicense(_owner:string, _repo: string) : Promise<string>
         owner: _owner,
         repo: _repo,
     });
-    let license : string = response['data']['license']?.name;
+    let license : string = response['data']['license']?.name!;
     //console.log("Inside function: " + typeof(license));
     //console.log("Inside function: " + license);
     return license;
@@ -224,7 +225,7 @@ export async function calcMaintainers(_owner:string, _repo:string) : Promise<num
         closed_at_date = current_date;
         }
         else {
-        closed_at_date = new Date(issues_response['data'][i].closed_at);
+        closed_at_date = new Date(issues_response['data'][i].closed_at!);
         }
 
         let created_at_date = new Date(issues_response['data'][i].created_at);

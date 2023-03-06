@@ -87,9 +87,19 @@ async function printOutput() {
         }
     }
 
+    // for (var module in moduleArray) {
+    //     console.log("{\"URL\":\"%s\", \"NET_SCORE\":%s, \"RAMP_UP_SCORE\":%s, \"CORRECTNESS_SCORE\":-1, \"BUS_FACTOR\":%s, \"RESPONSIVE_MAINTAINER_SCORE\":%s, \"LICENSE_SCORE\":%s}", initialURLArray[module], moduleArray[module].netScore.toFixed(2), moduleArray[module].rampUpScore.toFixed(2), moduleArray[module].busFactor.score.toFixed(2), moduleArray[module].responsiveness.score.toFixed(2), moduleArray[module].licensing.score.toFixed(2)); 
+    // }
+
     for (var module in moduleArray) {
-        console.log("{\"URL\":\"%s\", \"NET_SCORE\":%s, \"RAMP_UP_SCORE\":%s, \"CORRECTNESS_SCORE\":-1, \"BUS_FACTOR\":%s, \"RESPONSIVE_MAINTAINER_SCORE\":%s, \"LICENSE_SCORE\":%s}", initialURLArray[module], moduleArray[module].netScore.toFixed(2), moduleArray[module].rampUpScore.toFixed(2), moduleArray[module].busFactor.score.toFixed(2), moduleArray[module].responsiveness.score.toFixed(2), moduleArray[module].licensing.score.toFixed(2)); 
+        console.log("Ramp Up Score: %s", moduleArray[module].rampUpScore.toFixed(2));
+        console.log("Correctness Score: -1, to be implemented later"); // need to correct at a later date
+        console.log("Bus Factor Score: %s", moduleArray[module].busFactor.score.toFixed(2));
+        console.log("Responsiveness Score: %s", moduleArray[module].responsiveness.score.toFixed(2));
+        console.log("Licensing Score: %s", moduleArray[module].licensing.score.toFixed(2));
     }
+
+
 }
 async function main() {
     await printOutput();
