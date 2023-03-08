@@ -70,12 +70,21 @@ if [ "$LOG_LEVEL" = "0" ]; then
         echo "Successfully built."
 
     elif [ "$1" = "test" ]; then
+        export NVM_DIR="$HOME/.nvm" > /dev/null 2>&1
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" > /dev/null 2>&1
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" > /dev/null 2>&1
+        nvm use v18.14.0 > /dev/null 2>&1
         tsc test.ts --outDir ./js/
         node ./js/test.js
 
 
     else
         # Run with the converted URL file
+        export NVM_DIR="$HOME/.nvm" > /dev/null 2>&1
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" > /dev/null 2>&1
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" > /dev/null 2>&1
+        nvm use v18.14.0 > /dev/null 2>&1
+        
         rm -rf ./clone/
         
         node ./js/main.js "convertedURLs.txt" "$1"
@@ -141,12 +150,22 @@ elif [ "$LOG_LEVEL" = "1" ]; then
         echo "Successfully built."
 
     elif [ "$1" = "test" ]; then
+        export NVM_DIR="$HOME/.nvm" > /dev/null 2>&1
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" > /dev/null 2>&1
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" > /dev/null 2>&1
+        nvm use v18.14.0 > /dev/null 2>&1
+        
         tsc test.ts --outDir ./js/
         node ./js/test.js
 
 
     else
         # Run with the converted URL file
+        export NVM_DIR="$HOME/.nvm" > /dev/null 2>&1
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" > /dev/null 2>&1
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" > /dev/null 2>&1
+        nvm use v18.14.0 > /dev/null 2>&1
+        
         rm -rf ./clone/
         
         node ./js/main.js "convertedURLs.txt" "$1"
@@ -212,12 +231,21 @@ elif [ "$LOG_LEVEL" = "2" ]; then
         echo "Successfully built."
 
     elif [ "$1" = "test" ]; then
+        export NVM_DIR="$HOME/.nvm" > /dev/null 2>&1
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" > /dev/null 2>&1
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" > /dev/null 2>&1
+        nvm use v18.14.0 > /dev/null 2>&1
         tsc test.ts --outDir ./js/
         node ./js/test.js
 
 
     else
         # Run with the converted URL file
+        export NVM_DIR="$HOME/.nvm" > /dev/null 2>&1
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" > /dev/null 2>&1
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" > /dev/null 2>&1
+        nvm use v18.14.0 > /dev/null 2>&1
+        
         rm -rf ./clone/
         
         node ./js/main.js "convertedURLs.txt" "$1"
