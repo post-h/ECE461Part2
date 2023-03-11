@@ -90,7 +90,25 @@ async function printOutput() {
     // for (var module in moduleArray) {
     //     console.log("{\"URL\":\"%s\", \"NET_SCORE\":%s, \"RAMP_UP_SCORE\":%s, \"CORRECTNESS_SCORE\":-1, \"BUS_FACTOR\":%s, \"RESPONSIVE_MAINTAINER_SCORE\":%s, \"LICENSE_SCORE\":%s}", initialURLArray[module], moduleArray[module].netScore.toFixed(2), moduleArray[module].rampUpScore.toFixed(2), moduleArray[module].busFactor.score.toFixed(2), moduleArray[module].responsiveness.score.toFixed(2), moduleArray[module].licensing.score.toFixed(2)); 
     // }
-
+    
+    // newly added code (i'm not sure if it will be cleaner if we add it in GatherData.ts tho still a little confused)
+    // to be tested
+    let ingestible: number = 0;
+    for (var module in moduleArray) {
+        // add correctness
+        if(moduleArray[module].rampUpScore.toFixed(2) < 0.5) {
+            ingestible = -1;
+        } else if(moduleArray[module].busFactor.score.toFixed(2) < 0.5) {
+            ingestible = -1;
+        } else if(moduleArray[module].responsiveness.score.toFixed(2) < 0.5) {
+            ingestible = -1;
+        } else if(moduleArray[module].licensing.score.toFixed(2) < 0.5) {
+            ingestible = -1;
+        }
+    }
+    // end code
+    
+    // Printing out individual metric score aka extracting them
     for (var module in moduleArray) {
         console.log("Ramp Up Score: %s", moduleArray[module].rampUpScore.toFixed(2));
         console.log("Correctness Score: -1, to be implemented later"); // need to correct at a later date
