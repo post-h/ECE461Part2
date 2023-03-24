@@ -35,7 +35,7 @@ export class Module {
 
         // initializes each type of metric
         this.rampUp = new RampUp(_url);
-        this.correctness = new Correctness(); 
+        this.correctness = new Correctness(this.owner, this.repo); 
         this.busFactor = new BusFactor(this.owner, this.repo);
         this.responsiveness = new Responsiveness(this.owner, this.repo);
         this.licensing = new Licensing(this.owner, this.repo);
@@ -53,11 +53,10 @@ export class Module {
         return this.rampUpScore;
     }
 
-    calcCorrectnessScore()
+    async calcCorrectnessScore()
     {
-        this.correctnessScore = -1;
-        // this.correctness.calcMetric();
-        return this.correctnessScore;
+        // this.correctnessScore = -1;
+        this.correctness.score = await this.correctness.calcMetric();
     }
 
     async calcBusFactorScore()
@@ -79,7 +78,7 @@ export class Module {
     async calcNetScore() // might have to make this call and await each metric, and then calculate the weighted sum
     {
         // add metrics here
-        await this.calcLicensingScore();
+        // await this.calcLicensingScore();
         await this.calcBusFactorScore();
         this.netScore = Math.min(this.licensing.score, ((0.2 * this.rampUpScore) + (0.5 * this.responsiveness.score) + (0.3 * this.busFactor.score))); // add weighting scale to this
         //console.log(this.netScore);

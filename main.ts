@@ -46,6 +46,7 @@ async function calcScores(curModule : Module) {
     await curModule.calcBusFactorScore();
     await curModule.calcResponsivenessScore();
     await curModule.calcLicensingScore();
+    await curModule.calcCorrectnessScore();
 }
 
 // then for each module, we go through calculating each score
@@ -67,7 +68,7 @@ async function printOutput() {
     for (var module in moduleArray)
     {
         await moduleArray[module].calcRampUpScore();
-        //moduleArray[module].calcCorrectnessScore();
+        await moduleArray[module].calcCorrectnessScore();
         await moduleArray[module].calcBusFactorScore();
         await moduleArray[module].calcResponsivenessScore();
         await moduleArray[module].calcLicensingScore();
@@ -96,26 +97,30 @@ async function printOutput() {
     let ingestible: number = 0;
     for (var module in moduleArray) {
         // add correctness
-        if(moduleArray[module].rampUpScore.toFixed(2) < 0.5) {
+        if((moduleArray[module].rampUpScore.toFixed(2) as unknown as number) < 0.5) {
             ingestible = -1;
-        } else if(moduleArray[module].busFactor.score.toFixed(2) < 0.5) {
+        } else if ((moduleArray[module].correctness.score.toFixed(2) as unknown as number) < 0.5) {
             ingestible = -1;
-        } else if(moduleArray[module].responsiveness.score.toFixed(2) < 0.5) {
+        } else if((moduleArray[module].busFactor.score.toFixed(2) as unknown as number) < 0.5) {
             ingestible = -1;
-        } else if(moduleArray[module].licensing.score.toFixed(2) < 0.5) {
+        } else if((moduleArray[module].responsiveness.score.toFixed(2) as unknown as number) < 0.5) {
+            ingestible = -1;
+        } else if((moduleArray[module].licensing.score.toFixed(2) as unknown as number) < 0.5) {
             ingestible = -1;
         }
     }
+    
     // end code
     
     // Printing out individual metric score aka extracting them
     for (var module in moduleArray) {
         console.log("Ramp Up Score: %s", moduleArray[module].rampUpScore.toFixed(2));
-        console.log("Correctness Score: -1, to be implemented later"); // need to correct at a later date
+        console.log("Correctness Score: %s", moduleArray[module].correctness.score.toFixed(2)); 
         console.log("Bus Factor Score: %s", moduleArray[module].busFactor.score.toFixed(2));
         console.log("Responsiveness Score: %s", moduleArray[module].responsiveness.score.toFixed(2));
         console.log("Licensing Score: %s", moduleArray[module].licensing.score.toFixed(2));
-    }
+        console.log("Ingestible for use: %s", ingestible);
+    }   
 
 
 }

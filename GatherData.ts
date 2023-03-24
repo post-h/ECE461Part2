@@ -7,17 +7,50 @@ const octokit = new Octokit({
     baseUrl: 'https://api.github.com',
 });
 
-
-export async function getLicense(_owner:string, _repo: string) : Promise<string>
+export async function getCorrectness(_owner:string, _repo: string) : Promise<number>
 {
     const response = await octokit.request('GET /repos/{owner}/{repo}', {
         owner: _owner,
         repo: _repo,
     });
-    let license : string = response['data']['license']?.name!;
-    //console.log("Inside function: " + typeof(license));
-    //console.log("Inside function: " + license);
-    return license;
+
+    // console.log(response.data)
+    let subscribers = response.data.stargazers_count
+    let open_issues = response.data.open_issues
+    let correctness_score : number = 0
+    if (open_issues == 0) 
+    {
+        correctness_score = 0.5;
+    }
+    else 
+    {
+        correctness_score = (subscribers as number)/(open_issues as number);
+    }
+    
+    let normalized_correctness_score = correctness_score / (1 + correctness_score);
+    // this.score = correctness_score
+    return normalized_correctness_score;
+
+    // let subscribers : number = response.data.data.repository.stargazers.totalCount
+    // let issues : number = response.data.data.repository.issues.totalCount
+
+    // let license : string = response['data']['license']?.name!; //update to repo info
+    // //console.log("Inside function: " + typeof(license));
+    // //console.log("Inside function: " + license);
+    // return license;
+}
+
+
+export async function getLicense(_owner:string, _repo: string)
+{
+    const response = await octokit.request('GET /repos/{owner}/{repo}', {
+        owner: _owner,
+        repo: _repo,
+    });
+
+    let licensing = response.data.license
+
+    return licensing;
 }
 
 export async function getOpenIssues(_owner:string, _repo: string) : Promise<number>
@@ -27,7 +60,6 @@ export async function getOpenIssues(_owner:string, _repo: string) : Promise<numb
         repo: _repo,
     });
 
-    //console.log(response['data']['open_issues']);
     let open_issues : number = response['data']['open_issues'];
     
     return open_issues;
@@ -40,7 +72,6 @@ export async function getLastUpdate(_owner:string, _repo: string) : Promise<stri
         repo: _repo,
     });
 
-    //console.log(typeof(response['data']['updated_at']));
     let date : string = response['data']['updated_at'];
     
     return date.substring(0,4) + date.substring(5,7) + date.substring(8,10); // string formatted: "YYYYMMDD"

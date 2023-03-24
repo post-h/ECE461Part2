@@ -1,4 +1,5 @@
 import { Metric } from "./Metric";
+import { getLicense } from "./GatherData";
 
 export class Licensing {//implements Metric{
     score : number = 0;
@@ -18,38 +19,47 @@ export class Licensing {//implements Metric{
 
 async function calc(_owner: string, _repo: string) : Promise<number>
 {
-    let gql_query = `
+    // let gql_query = `
     
-    {
-        repository(owner: "${_owner}", name: "${_repo}") {
-            licenseInfo {
-                name
-            }
-        }
-    }
+    // {
+    //     repository(owner: "${_owner}", name: "${_repo}") {
+    //         licenseInfo {
+    //             name
+    //         }
+    //     }
+    // }
 
-    `;
+    // `;
 
-    const response = await fetch("https://api.github.com/graphql", {
-        method: "POST",
-    headers: {
-        Authorization: `Token ${process.env.GITHUB_TOKEN}`,
-    },
-    body: JSON.stringify({ query: gql_query }),
-    });
+    // const response = await fetch("https://api.github.com/graphql", {
+    //     method: "POST",
+    // headers: {
+    //     Authorization: `Token ${process.env.GITHUB_TOKEN}`,
+    // },
+    // body: JSON.stringify({ query: gql_query }),
+    // });
 
-    const parsed_data = await response.json();
-    // let license : string = parsed_data['data']['repository']['licenseInfo']['name'];
-    let license : string = parsed_data['data']['repository']['licenseInfo']?.name;
+    // const parsed_data = await response.json();
+    // // let license : string = parsed_data['data']['repository']['licenseInfo']['name'];
+    // let license : string = parsed_data['data']['repository']['licenseInfo']?.name;
 
 
-    //console.log(license);
-    if(license === "GNU Lesser General Public License v2.1" || license === "GNU Lesser General Public v2.0" || license === "GNU Lesser General Public v3.0" || license === "MIT License")
-    {
-        return 1;
-    }
-    else
-    {
+    // //console.log(license);
+    // if(license === "GNU Lesser General Public License v2.1" || license === "GNU Lesser General Public v2.0" || license === "GNU Lesser General Public v3.0" || license === "MIT License")
+    // {
+    //     return 1;
+    // }
+    // else
+    // {
+    //     return 0;
+    // }
+
+    let licensing_score = await getLicense(_owner, _repo);
+    
+    if (licensing_score == null) {
         return 0;
+    }
+    else {
+        return 1;
     }
 }
