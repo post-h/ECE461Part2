@@ -1,6 +1,0 @@
-{"metric":"RAMP_UP_SCORE", "api":"clone", "filepath":"RampUp.ts", "line":43}
-{"metric":"RESPONSIVENESS_SCORE", "api":"rest", "filepath":"GatherData.ts", "line":145}
-{"metric":"RESPONSIVENESS_SCORE", "api":"rest", "filepath":"GatherData.ts", "line":193}
-{"metric":"RESPONSIVENESS_SCORE", "api":"rest", "filepath":"GatherData.ts", "line":206}
-{"metric":"LICENSING_SCORE", "api":"graphql", "filepath":"Licensing.ts", "line":33}
-{"metric":"BUS_FACTOR_SCORE", "api":"rest", "filepath":"GatherData.ts", "line":51}
