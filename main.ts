@@ -64,7 +64,7 @@ async function calcScores(curModule : Module) {
 //     // console.log(moduleArray[module].netScore);
 // }
 
-async function printOutput() {
+async function ingestibility() {
     for (var module in moduleArray)
     {
         await moduleArray[module].calcRampUpScore();
@@ -94,38 +94,56 @@ async function printOutput() {
     
     // newly added code (i'm not sure if it will be cleaner if we add it in GatherData.ts tho still a little confused)
     // to be tested
-    let ingestible: number = 0;
     for (var module in moduleArray) {
         // add correctness
         if((moduleArray[module].rampUpScore.toFixed(2) as unknown as number) < 0.5) {
-            ingestible = -1;
+            moduleArray[module].ingestible = -1;
         } else if ((moduleArray[module].correctness.score.toFixed(2) as unknown as number) < 0.5) {
-            ingestible = -1;
+            moduleArray[module].ingestible = -1;
         } else if((moduleArray[module].busFactor.score.toFixed(2) as unknown as number) < 0.5) {
-            ingestible = -1;
+            moduleArray[module].ingestible = -1;
         } else if((moduleArray[module].responsiveness.score.toFixed(2) as unknown as number) < 0.5) {
-            ingestible = -1;
+            moduleArray[module].ingestible = -1;
         } else if((moduleArray[module].licensing.score.toFixed(2) as unknown as number) < 0.5) {
-            ingestible = -1;
+            moduleArray[module].ingestible = -1;
         }
     }
     
     // end code
     
     // Printing out individual metric score aka extracting them
+    // for (var module in moduleArray) {
+    //     console.log("Ramp Up Score: %s", moduleArray[module].rampUpScore.toFixed(2));
+    //     console.log("Correctness Score: %s", moduleArray[module].correctness.score.toFixed(2)); 
+    //     console.log("Bus Factor Score: %s", moduleArray[module].busFactor.score.toFixed(2));
+    //     console.log("Responsiveness Score: %s", moduleArray[module].responsiveness.score.toFixed(2));
+    //     console.log("Licensing Score: %s", moduleArray[module].licensing.score.toFixed(2));
+    //     console.log("Ingestible for use: %s", ingestible);
+    // }
+
+    const outputFile = 'outputIngestible.txt';
+
     for (var module in moduleArray) {
-        console.log("Ramp Up Score: %s", moduleArray[module].rampUpScore.toFixed(2));
-        console.log("Correctness Score: %s", moduleArray[module].correctness.score.toFixed(2)); 
-        console.log("Bus Factor Score: %s", moduleArray[module].busFactor.score.toFixed(2));
-        console.log("Responsiveness Score: %s", moduleArray[module].responsiveness.score.toFixed(2));
-        console.log("Licensing Score: %s", moduleArray[module].licensing.score.toFixed(2));
-        console.log("Ingestible for use: %s", ingestible);
-    }   
+        let full_string: string = moduleArray[module].owner + " " + moduleArray[module].repo + " " + moduleArray[module].ingestible.toString() + '\n';
+        fs.appendFile(outputFile, full_string, (err) => {
+            if (err) throw err;
+        });
+    }
+    
+    
+    // let ingestOut : string;
+    // ingestOut = ingestible as string
+    // fs.writeSync(FILEOUT, ingestOut);
+
+    // return ingestible
 
 
 }
 async function main() {
-    await printOutput();
+    await ingestibility();
+    // let ingestible : number = await ingestibility();
+    // return ingestible 
+
 }
 
 main();

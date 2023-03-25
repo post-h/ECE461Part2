@@ -24,6 +24,7 @@ export class Module {
     busFactorScore: number;
     responsivenessScore: number;
     licensingScore: number;
+    ingestible: number;
 
     // constructor
     constructor(_url : string)
