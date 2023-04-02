@@ -13,11 +13,11 @@ jobs:
     - name: Install dependencies
       run: npm install
     - name: Build
-      run: ./run build
+      run: bash ./run build
     - name: Test
       env:
         GITHUB_TOKEN: ${{ secrets.WILLIAMS_KEY }}
-      run: ./run test
+      run: bash ./run test
 
   # deploy:
   #   needs: build
