@@ -21,6 +21,6 @@ jobs:
 
     - name: Transfer code to GCP VM
       run: |
-        gcloud compute scp --zone us-central1-a ./ my-instance-name:~
+        gcloud compute scp --zone us-central1-a ./ ece461-project:~
       env:
         INSTANCE_NAME: ece461-project
