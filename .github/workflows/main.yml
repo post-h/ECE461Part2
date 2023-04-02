@@ -13,10 +13,16 @@ jobs:
     - name: Install dependencies
       run: npm install
     - name: Build
+      env:
+        GITHUB_TOKEN: ${{ secrets.WILLIAMS_KEY }}
+        LOG_FILE: ${{ secrets.LOG_FILE }}
+        LOG_LEVEL: ${{ secrets.LOG_LEVEL }}
       run: bash ./run build
     - name: Test
       env:
         GITHUB_TOKEN: ${{ secrets.WILLIAMS_KEY }}
+        LOG_FILE: ${{ secrets.LOG_FILE }}
+        LOG_LEVEL: ${{ secrets.LOG_LEVEL }}
       run: bash ./run test
 
   # deploy:
