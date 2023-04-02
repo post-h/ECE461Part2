@@ -1,0 +1,27 @@
+name: Transfer code to GCP VM
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  transfer:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Authenticate with GCP
+      uses: google-github-actions/setup-gcloud@master
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+      id: auth
+
+    - name: Transfer code to GCP VM
+      run: |
+        gcloud compute scp --zone us-central1-a ./ my-instance-name:~
+      env:
+        INSTANCE_NAME: ece461-project
