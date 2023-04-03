@@ -20,12 +20,12 @@ jobs:
       id: auth
 
     - name: Copy files to GCP VM
-    uses: appleboy/scp-action@master
-    with:
+      uses: appleboy/scp-action@master
+      with:
       host: [ ece461-project ]
-      username: [ williamgabrielj ]
-      key: ${{ secrets.SSH_PRIVATE_KEY }}
-      source: [ ./ ]
-      target: [ ~ ]
+        username: [ williamgabrielj ]
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        source: [ ./ ]
+        target: [ ~ ]
 
 
