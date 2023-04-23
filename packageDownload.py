@@ -1,7 +1,6 @@
-import os
 import subprocess
 
-## readline sampke text for len # libes
+## readline sample text for len # libes
 ## call below 
 # FILEIN = open('sample.txt', 'r')
 subprocess.run(['./run', 'sample.txt'])
@@ -24,6 +23,7 @@ for idx in range(len(info)):
     elif (ingestibility[idx] == 0):
         ## do something
         print('Congrats,', repos[idx], 'was determined to be ingestible. Downloading now.')
+        subprocess.run('npm install', 'repos')
     else:
         print("Error slay! :P")
         print(ingestibility[idx])
