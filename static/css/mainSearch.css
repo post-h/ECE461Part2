@@ -524,7 +524,7 @@ legend {
   height: 0;
   width: 0;
   border-style: solid;
-  border-color: #333333 transparent transparent transparent;
+  border-color: #FC6666 transparent transparent transparent;
   border-width: 5px;
   position: absolute;
   right: 11.5px;
@@ -955,11 +955,15 @@ legend {
   fill: #000;
 }
 
-.s004 form .suggestion-wrap {
-  padding: 0 15px;
+.s004 form .pageButton {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 20px;
 }
 
-.s004 form .suggestion-wrap span {
+.s004 form .pageButtonText {
+  text-decoration: none;
   font-size: 14px;
   font-family: 'Helvetica', sans-serif;
   font-weight: 800;
@@ -968,6 +972,11 @@ legend {
   line-height: 32px;
   color: #252424;
   border-radius: 16px;
-  margin-right: 10px;
-  margin-bottom: 10px;
+  /* margin-right: 10px;
+  margin-bottom: 10px; */
 }
+
+.s004 form .pageButtonText:hover {
+  color:#FC6666
+}
+
