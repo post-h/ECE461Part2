@@ -4,6 +4,7 @@
     "jquery": "^3.6.4",
     "minimist": "^1.2.7",
     "octokit": "^2.0.14",
+    "sqlite3": "^5.1.6",
     "ts-command-line-args": "^2.4.2"
   },
   "devDependencies": {
