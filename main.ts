@@ -10,8 +10,14 @@ import { Correctness } from "./Correctness";
 import { BusFactor } from "./BusFactor";
 import { Responsiveness } from "./Responsiveness";
 import { Licensing } from "./Licensing"
+import { Adherence } from './Adherence';
+import { VersionPinning } from './VersionPinning';
 import { exit } from "process";
 import { fileURLToPath } from 'url';
+import * as sqlite3 from "sqlite3";
+import { version } from 'os';
+
+const db = new sqlite3.Database('modules.db')
 
 // example: array of URLs --> assuming we read in the input file as strings
 //let urlArray : string[] = [ "www.mockurl1.com", "www.pretendurl.com", "www.testingurl.com" ];
@@ -47,6 +53,34 @@ async function calcScores(curModule : Module) {
     await curModule.calcResponsivenessScore();
     await curModule.calcLicensingScore();
     await curModule.calcCorrectnessScore();
+    await curModule.calcAdherenceScore();
+    await curModule.calcVersionPinningScore();
+
+    const data = {
+        name: curModule.repo,
+        rampUp : curModule.rampUp,
+        correctness : curModule.correctness,
+        busFactor : curModule.busFactor,
+        responsiveness : curModule.responsiveness,
+        licensing : curModule.licensing,
+        adherence : curModule.adherence,
+        versionPinning : curModule.versionPinning,
+    };
+    
+    const sql = 'INSERT INTO ratings (ID, BusFactor, Correctness, RampUp, LicenseScore, GoodPinning, PullRequest, NetScore) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+    db.run(sql, [curModule.repo, curModule.busFactor, curModule.correctness,
+        curModule.rampUp, curModule.licensing, curModule.versionPinning, curModule.adherence, curModule.netScore], function(err) {
+            if (err) {
+                console.error(err.message);
+              } else {
+                console.log(`Inserted row with id ${this.lastID}`);
+              }
+        });
+
+    const sql2 = 'INSERT INTO modules (Name, Version, ID) VALUES (?, ?, ?)';
+    db.run(sql2, [curModule.repo, 0, curModule.repo]) // NEED to put in the version number
+
+    db.close()
 }
 
 // then for each module, we go through calculating each score
@@ -72,6 +106,8 @@ async function ingestibility() {
         await moduleArray[module].calcBusFactorScore();
         await moduleArray[module].calcResponsivenessScore();
         await moduleArray[module].calcLicensingScore();
+        await moduleArray[module].calcAdherenceScore();
+        await moduleArray[module].calcVersionPinningScore();
 
         // calcScores(moduleArray[module]);
 
@@ -106,6 +142,10 @@ async function ingestibility() {
             moduleArray[module].ingestible = -1;
         } else if((moduleArray[module].licensing.score.toFixed(2) as unknown as number) < 0.5) {
             moduleArray[module].ingestible = -1;
+        } else if((moduleArray[module].adherence.score.toFixed(2) as unknown as number) < 0.5) {
+            moduleArray[module].ingestible = -1;
+        } else if((moduleArray[module].versionPinning.score.toFixed(2) as unknown as number) < 0.5) {
+            moduleArray[module].ingestible = -1;
         }
     }
     
@@ -139,6 +179,8 @@ async function ingestibility() {
 
 
 }
+
+
 async function main() {
     await ingestibility();
     // let ingestible : number = await ingestibility();

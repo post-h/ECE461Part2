@@ -300,8 +300,11 @@ export async function calcMaintainers(_owner:string, _repo:string) : Promise<num
 
 
 export async function getVersionPinning(_owner:string, _repo:string): Promise<boolean> {
+    const response = await octokit.request('GET /repos/{owner}/{repo}/contents/package.json', {
+        owner: _owner,
+        repo: _repo,
+    }); 
     
-    const response = await octokit.request('GET /repos/${owner}/${repo}/contents/package.json');
     const packageJson = Buffer.from(response.data.content, "base64").toString();
     const dependencies = JSON.parse(packageJson).devDependencies || {};
     const packageVersion = dependencies[_repo];
@@ -366,4 +369,16 @@ export async function getAdherence(_owner:string, _repo:string): Promise<boolean
     }
 
     return adherence;
+}
+
+export async function getVersionNumber(_owner:string, _repo: string)
+{
+    const response = await octokit.request('GET /repos/{owner}/{repo}', {
+        owner: _owner,
+        repo: _repo,
+    });
+
+    let versionNum = Octokit.VERSION;
+
+    return versionNum;
 }

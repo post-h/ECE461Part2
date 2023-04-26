@@ -5,6 +5,8 @@ import { Correctness } from "./Correctness";
 import { BusFactor } from "./BusFactor";
 import { Responsiveness } from "./Responsiveness";
 import { Licensing } from "./Licensing"
+import { Adherence } from "./Adherence";
+import { VersionPinning } from "./VersionPinning";
 
 export class Module {
     // private instance variables
@@ -18,13 +20,18 @@ export class Module {
     busFactor : BusFactor;
     responsiveness : Responsiveness;
     licensing : Licensing;
+    adherence : Adherence;
+    versionPinning : VersionPinning;
     
     rampUpScore: number;
-    correctnessScore: number;
-    busFactorScore: number;
-    responsivenessScore: number;
-    licensingScore: number;
+    // correctnessScore: number;
+    // busFactorScore: number;
+    // responsivenessScore: number;
+    // licensingScore: number;
+    // adherenceScore: number;
+    // versionPinningScore: number;
     ingestible: number;
+
 
     // constructor
     constructor(_url : string)
@@ -40,6 +47,8 @@ export class Module {
         this.busFactor = new BusFactor(this.owner, this.repo);
         this.responsiveness = new Responsiveness(this.owner, this.repo);
         this.licensing = new Licensing(this.owner, this.repo);
+        this.adherence = new Adherence(this.owner, this.repo);
+        this.versionPinning = new VersionPinning(this.owner, this.repo);
     }
 
     // methods
@@ -75,13 +84,24 @@ export class Module {
     {
         this.licensing.score = await this.licensing.calcMetric();
     }
+
+    async calcAdherenceScore()
+    {
+        this.adherence.score = await this.adherence.calcMetric();
+    }
+
+    async calcVersionPinningScore()
+    {
+        this.versionPinning.score = await this.versionPinning.calcMetric();
+    }
     
     async calcNetScore() // might have to make this call and await each metric, and then calculate the weighted sum
     {
         // add metrics here
         // await this.calcLicensingScore();
-        await this.calcBusFactorScore();
-        this.netScore = Math.min(this.licensing.score, ((0.2 * this.rampUpScore) + (0.5 * this.responsiveness.score) + (0.3 * this.busFactor.score))); // add weighting scale to this
+        // await this.calcBusFactorScore(); commented out but if err check here!!!!!!!!!!!!!!!!!!
+        // this.netScore = Math.min(this.licensing.score, ((0.2 * this.rampUpScore) + (0.5 * this.responsiveness.score) + (0.3 * this.busFactor.score))); // add weighting scale to this
+        this.netScore = (this.adherence.score + this.licensing.score + this.versionPinning.score + this.responsiveness.score + this.rampUpScore + this.busFactor.score + this.correctness.score) / 7;
         //console.log(this.netScore);
     }
 
