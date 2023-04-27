@@ -132,7 +132,7 @@ async function ingestibility() {
     // to be tested
     for (var module in moduleArray) {
         // add correctness
-        if((moduleArray[module].rampUpScore.toFixed(2) as unknown as number) < 0.5) {
+        if((moduleArray[module].rampUp.score.toFixed(2) as unknown as number) < 0.5) {
             moduleArray[module].ingestible = -1;
         } else if ((moduleArray[module].correctness.score.toFixed(2) as unknown as number) < 0.5) {
             moduleArray[module].ingestible = -1;
