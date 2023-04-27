@@ -16,27 +16,19 @@ import { spawnSync } from 'child_process';
 import { writeFileSync } from 'fs';
 import { Metric } from "./Metric";
 
-export class RampUp implements Metric{
+export class RampUp implements Metric {
+    score : number = 0;
 
     constructor(public url: string) {
     }
 
-    calcMetric() : number
+    calcMetric() : Promise<number>
     {
-        // Call conductRampUp function and send in current URL
-        const ratio = conductRampUp(this.url);
-
-        // We say a ratio of 1:5 is worth a score of 0.5. To account for this, we multiply by 2.5 because 1:5 = 1/5 = 0.2 and 0.2 * 2.5 = 0.5.
-        var score:number = ratio * 2.5;
-        if(score > 1) { // cap score at 1
-            score = 1;
-        }
-        //console.log(score);
-        return score;
+        return conductRampUp(this.url);
     }
 }
 
-function conductRampUp(url : string): number {
+function conductRampUp(url : string): Promise<number> {
     // For some reason, git clone logs the message "Cloning into './clone'..." as stderr
     // so keep that in mind if changes happen here.
     // Clone url repo
@@ -80,5 +72,10 @@ function conductRampUp(url : string): number {
     // Remove cloned directory
     spawnSync('rm', ['-rf', './clone']);
 
-    return ratio;
+    ratio = ratio * 2.5;
+    if (ratio > 1) {
+        ratio = 1;
+    }
+
+    return Promise.resolve(ratio);
 }

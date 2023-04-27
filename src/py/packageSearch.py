@@ -11,4 +11,4 @@ def searchPackage(package_name):
     print(output)
 
 if __name__ == '__main__':
-    searchPackage('lodash') #change input into user input
+    searchPackage('nodist') #change input into user input
