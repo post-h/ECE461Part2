@@ -5,5 +5,4 @@ logs.txt
 package-lock.json
 package.json
 /environment
-*.txt
 *.log
