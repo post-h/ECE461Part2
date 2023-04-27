@@ -16,19 +16,19 @@ import { spawnSync } from 'child_process';
 import { writeFileSync } from 'fs';
 import { Metric } from "./Metric";
 
-export class RampUp implements Metric {
+export class RampUp {
     score : number = 0;
 
     constructor(public url: string) {
     }
 
-    calcMetric() : Promise<number>
+    calcMetric() : number
     {
         return conductRampUp(this.url);
     }
 }
 
-function conductRampUp(url : string): Promise<number> {
+function conductRampUp(url : string): number {
     // For some reason, git clone logs the message "Cloning into './clone'..." as stderr
     // so keep that in mind if changes happen here.
     // Clone url repo
@@ -77,5 +77,5 @@ function conductRampUp(url : string): Promise<number> {
         ratio = 1;
     }
 
-    return Promise.resolve(ratio);
+    return ratio;
 }
