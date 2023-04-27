@@ -4,7 +4,8 @@ import { Module } from "./Module";
 function _test_rampUp_easy(tests_passed:number) {
     let module = new Module("https://github.com/hasier1227/461_test");
 
-    let output = module.calcRampUpScore();
+    module.calcRampUpScore();
+    let output = module.rampUp.score;
     output = +(output.toFixed(1));
 
     if (output == 0.3) {
@@ -17,7 +18,8 @@ function _test_rampUp_easy(tests_passed:number) {
 function _test_rampUp_medium(tests_passed:number) {
     let module = new Module("https://github.com/cloudinary/cloudinary_npm");
 
-    let output = module.calcRampUpScore();
+    module.calcRampUpScore();
+    let output = module.rampUp.score;
     output = +(output.toFixed(1));
 
     if (output == 0.3) {
@@ -30,7 +32,8 @@ function _test_rampUp_medium(tests_passed:number) {
 function _test_rampUp_hard(tests_passed:number) {
     let module = new Module("https://github.com/lodash/lodash");
 
-    let output = module.calcRampUpScore();
+    module.calcRampUpScore();
+    let output = module.rampUp.score;
     output = +(output.toFixed(1));
 
     if (output == 0.7) {
@@ -43,7 +46,8 @@ function _test_rampUp_hard(tests_passed:number) {
 function _test_rampUp_edge(tests_passed:number) {
     let module = new Module("https://github.com/aaronlovell7/ECE461TeamAFJK");
 
-    let output = module.calcRampUpScore();
+    module.calcRampUpScore();
+    let output = module.rampUp.score;
     output = +(output.toFixed(1));
 
     if (output == 0.5) {
@@ -56,7 +60,8 @@ function _test_rampUp_edge(tests_passed:number) {
 function _test_rampUp_edge2(tests_passed:number) {
     let module = new Module("https://github.com/jonrandoem/eyeos");
 
-    let output = module.calcRampUpScore();
+    module.calcRampUpScore();
+    let output = module.rampUp.score;
     output = +(output.toFixed(1));
 
     if (output == 0.7) {

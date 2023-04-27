@@ -1,48 +1,35 @@
 import { Octokit } from "octokit";
 
 const octokit = new Octokit({
-    auth: process.env.GITHUB_TOKEN,  // change to your token for now,  I will figure out how to get to use the environment variable soon
+    auth: process.env.GITHUB_TOKEN,
     userAgent: 'testing',
     timeZone: "Eastern",
     baseUrl: 'https://api.github.com',
 });
 
-export async function getCorrectness(_owner:string, _repo: string) : Promise<number>
-{
+export async function getCorrectness(_owner: string, _repo: string): Promise<number> {
     const response = await octokit.request('GET /repos/{owner}/{repo}', {
         owner: _owner,
         repo: _repo,
     });
 
-    // console.log(response.data)
     let subscribers = response.data.stargazers_count
     let open_issues = response.data.open_issues
-    let correctness_score : number = 0
-    if (open_issues == 0) 
-    {
+    let correctness_score: number = 0
+    if (open_issues == 0) {
         correctness_score = 0.5;
     }
-    else 
-    {
-        correctness_score = (subscribers as number)/(open_issues as number);
+    else {
+        correctness_score = (subscribers as number) / (open_issues as number);
     }
-    
+
     let normalized_correctness_score = correctness_score / (1 + correctness_score);
-    // this.score = correctness_score
+
     return normalized_correctness_score;
-
-    // let subscribers : number = response.data.data.repository.stargazers.totalCount
-    // let issues : number = response.data.data.repository.issues.totalCount
-
-    // let license : string = response['data']['license']?.name!; //update to repo info
-    // //console.log("Inside function: " + typeof(license));
-    // //console.log("Inside function: " + license);
-    // return license;
 }
 
 
-export async function getLicense(_owner:string, _repo: string)
-{
+export async function getLicense(_owner: string, _repo: string) {
     const response = await octokit.request('GET /repos/{owner}/{repo}', {
         owner: _owner,
         repo: _repo,
@@ -53,61 +40,50 @@ export async function getLicense(_owner:string, _repo: string)
     return licensing;
 }
 
-export async function getOpenIssues(_owner:string, _repo: string) : Promise<number>
-{
+export async function getOpenIssues(_owner: string, _repo: string): Promise<number> {
     const response = await octokit.request('GET /repos/{owner}/{repo}', {
         owner: _owner,
         repo: _repo,
     });
 
-    let open_issues : number = response['data']['open_issues'];
-    
+    let open_issues: number = response['data']['open_issues'];
+
     return open_issues;
 }
 
-export async function getLastUpdate(_owner:string, _repo: string) : Promise<string>
-{
+export async function getLastUpdate(_owner: string, _repo: string): Promise<string> {
     const response = await octokit.request('GET /repos/{owner}/{repo}', {
         owner: _owner,
         repo: _repo,
     });
 
-    let date : string = response['data']['updated_at'];
-    
-    return date.substring(0,4) + date.substring(5,7) + date.substring(8,10); // string formatted: "YYYYMMDD"
+    let date: string = response['data']['updated_at'];
+
+    return date.substring(0, 4) + date.substring(5, 7) + date.substring(8, 10); // string formatted: "YYYYMMDD"
 }
 
-export async function getContributors(_owner:string, _repo: string) : Promise<number>
-{
+export async function getContributors(_owner: string, _repo: string): Promise<number> {
     const response = await octokit.request('GET /repos/{owner}/{repo}/contributors', {
         owner: _owner,
         repo: _repo,
         per_page: 100,
     });
 
-    //console.log(response['data']);
-    //let contributors : string = response['data'][0]?.login;
-    //console.log("Number of contributors %d", (response['data']).length);
-    //console.log(contributors);
+    let num_contributors: number = response['data'].length;
+    let total_contributions: number = 0;
 
-    let num_contributors : number = response['data'].length;
-    let total_contributions : number = 0;
-
-    for( let i = 0; i < num_contributors; i++ )
-    {
+    for (let i = 0; i < num_contributors; i++) {
         total_contributions += response['data'][i]?.contributions;
     }
-    
+
     // a good contributor is defined as someone who has accounted for at least (1 / num_contributors)% of total contributions 
     // we decided on this, 
-    let num_good_contributors : number = 0; 
-    let target_contributions : number = total_contributions / num_contributors;
+    let num_good_contributors: number = 0;
+    let target_contributions: number = total_contributions / num_contributors;
 
-    for( let i = 0; i < num_contributors; i++ )
-    {
-        let user_contributions : number = response['data'][i]?.contributions;
-        if( user_contributions >= target_contributions )  
-        {
+    for (let i = 0; i < num_contributors; i++) {
+        let user_contributions: number = response['data'][i]?.contributions;
+        if (user_contributions >= target_contributions) {
             num_good_contributors += 1;
         }
     }
@@ -116,8 +92,7 @@ export async function getContributors(_owner:string, _repo: string) : Promise<nu
 
     // worst case scenario is there is only 1 contributor that is responsible bus factor
     // this is the highest possible risk, so it gets a score of zero
-    if( num_good_contributors === 1 ) 
-    {
+    if (num_good_contributors === 1) {
         final_score = 0;
     }
     else // otherwise we return a ratio of the good contributors to total
@@ -125,31 +100,25 @@ export async function getContributors(_owner:string, _repo: string) : Promise<nu
         // a perfect score is earned if everyone makes their "fair share" of meaningful contributions. If one person got "hit by a bus", the project can still continue
         final_score = (num_good_contributors) / num_contributors; // this ratio will be in the range [0,1]
     }
-    
+
     // caps score at 0.5 (by dividing by 2) if there are less than 10 total contributors to begin with
-    if( num_contributors <= 5 )
-    {
+    if (num_contributors <= 5) {
         return final_score / 2;
     }
     // used to handle when there are more than 100 contributors, because requests for multiple pages may throw errors when there aren't multiple pages available
-    else if( num_contributors == 100 ) 
-    {
-        if( final_score + 0.5 > 1 )
-        {
+    else if (num_contributors == 100) {
+        if (final_score + 0.5 > 1) {
             return 1;
         }
         return final_score + 0.5;
     }
-    else if( num_contributors >= 50 )
-    {
-        if( final_score + 0.25 > 1)
-        {
+    else if (num_contributors >= 50) {
+        if (final_score + 0.25 > 1) {
             return 1;
         }
         return final_score + 0.25;
     }
-    else
-    {
+    else {
         return final_score;
     }
 }
@@ -169,8 +138,8 @@ export async function getContributors(_owner:string, _repo: string) : Promise<nu
 *     issue is not closed, we use the current date as the "close" date. We then add these times up and divide by 10 to get an average reponse time. We then adjust the
 *      score appropriately. 
 ************************************************************************************************************************************************************************/
-export async function calcMaintainers(_owner:string, _repo:string) : Promise<number> {
-    let score : number;
+export async function calcMaintainers(_owner: string, _repo: string): Promise<number> {
+    let score: number;
 
     // Request info on contributors
     const contributors_response = await octokit.request('GET /repos/{owner}/{repo}/contributors', {
@@ -180,40 +149,37 @@ export async function calcMaintainers(_owner:string, _repo:string) : Promise<num
     });
 
     // Grab number of contributors and initialize total_contributions
-    let num_contributors : number = contributors_response['data'].length;
-    let total_contributions : number = 0;
+    let num_contributors: number = contributors_response['data'].length;
+    let total_contributions: number = 0;
 
     // Loop through all contributions and calculate total number of contributions
-    for( let i = 0; i < num_contributors; i++ )
-    {
+    for (let i = 0; i < num_contributors; i++) {
         total_contributions += contributors_response['data'][i]?.contributions;
     }
 
     // A good contributor is defined as someone who has accounted for at least (1 / num_contributors)% of total contributions 
-    let num_good_contributors : number = 0; 
-    let target_contributions : number = total_contributions / num_contributors;
+    let num_good_contributors: number = 0;
+    let target_contributions: number = total_contributions / num_contributors;
 
     // Loop through contributors and comapre their number of contributions to the ratio defined above
-    for( let i = 0; i < num_contributors; i++ )
-    {
-        let user_contributions : number = contributors_response['data'][i]?.contributions;
-        if( user_contributions >= target_contributions )  
-        {
+    for (let i = 0; i < num_contributors; i++) {
+        let user_contributions: number = contributors_response['data'][i]?.contributions;
+        if (user_contributions >= target_contributions) {
             num_good_contributors += 1;
         }
     }
 
     // Assign preliminary score based on number of maintainers
-    if(num_good_contributors > 0 && num_good_contributors < 5) {
+    if (num_good_contributors > 0 && num_good_contributors < 5) {
         score = 0;
     }
-    else if(num_good_contributors > 4 && num_good_contributors < 10) {
+    else if (num_good_contributors > 4 && num_good_contributors < 10) {
         score = 0.2;
     }
-    else if(num_good_contributors > 9 && num_good_contributors < 15) {
+    else if (num_good_contributors > 9 && num_good_contributors < 15) {
         score = 0.4;
     }
-    else if(num_good_contributors > 14 && num_good_contributors < 20) {
+    else if (num_good_contributors > 14 && num_good_contributors < 20) {
         score = 0.6;
     }
     else {
@@ -227,9 +193,9 @@ export async function calcMaintainers(_owner:string, _repo:string) : Promise<num
     });
 
     // Get boolan on discussions and assign score increment if true
-    let discussions : boolean = discussion_response['data']['has_discussions'];
+    let discussions: boolean = discussion_response['data']['has_discussions'];
 
-    if(discussions) {
+    if (discussions) {
         score += 0.2;
     }
 
@@ -245,17 +211,16 @@ export async function calcMaintainers(_owner:string, _repo:string) : Promise<num
     const current_date = new Date();
 
     // Loop through most recent 10 issues and calculate how long it took to be resolved
-    for( let i = 0; i < 10; i++ )
-    {
-        if(issues_response['data'][i] == undefined) {
-        break;
+    for (let i = 0; i < 10; i++) {
+        if (issues_response['data'][i] == undefined) {
+            break;
         }
 
-        if(issues_response['data'][i].closed_at == null) {
-        closed_at_date = current_date;
+        if (issues_response['data'][i].closed_at == null) {
+            closed_at_date = current_date;
         }
         else {
-        closed_at_date = new Date(issues_response['data'][i].closed_at!);
+            closed_at_date = new Date(issues_response['data'][i].closed_at!);
         }
 
         let created_at_date = new Date(issues_response['data'][i].created_at);
@@ -268,19 +233,19 @@ export async function calcMaintainers(_owner:string, _repo:string) : Promise<num
     avg_resp_time /= 3600000 * 24;
 
     // Adjust score accordingly 
-    if(avg_resp_time > 60 || avg_resp_time == 0) {
+    if (avg_resp_time > 60 || avg_resp_time == 0) {
         score = 0;
     }
-    else if(avg_resp_time > 40 && avg_resp_time <= 60) {
+    else if (avg_resp_time > 40 && avg_resp_time <= 60) {
         score -= 0.4;
     }
-    else if(avg_resp_time > 30 && avg_resp_time <= 40) {
+    else if (avg_resp_time > 30 && avg_resp_time <= 40) {
         score -= 0.2;
     }
-    else if(avg_resp_time > 20 && avg_resp_time <= 30) {
+    else if (avg_resp_time > 20 && avg_resp_time <= 30) {
         score = score;
     }
-    else if(avg_resp_time > 10 && avg_resp_time <= 20) {
+    else if (avg_resp_time > 10 && avg_resp_time <= 20) {
         score += 0.2;
     }
     else {
@@ -288,10 +253,10 @@ export async function calcMaintainers(_owner:string, _repo:string) : Promise<num
     }
 
     // Ceiling and floor score 
-    if(score > 1) {
+    if (score > 1) {
         score = 1;
     }
-    else if( score < 0) {
+    else if (score < 0) {
         score = 0;
     }
 
@@ -299,26 +264,26 @@ export async function calcMaintainers(_owner:string, _repo:string) : Promise<num
 }
 
 
-export async function getVersionPinning(_owner:string, _repo:string): Promise<boolean> {
+export async function getVersionPinning(_owner: string, _repo: string): Promise<boolean> {
     const response = await octokit.request('GET /repos/{owner}/{repo}/contents/package.json', {
         owner: _owner,
         repo: _repo,
-    }); 
-    
+    });
+
     const packageJson = Buffer.from(response.data.content, "base64").toString();
     const dependencies = JSON.parse(packageJson).devDependencies || {};
     const packageVersion = dependencies[_repo];
-    
+
     return packageVersion !== undefined;
 }
 
-export async function getAdherence(_owner:string, _repo:string): Promise<boolean> {
+export async function getAdherence(_owner: string, _repo: string): Promise<boolean> {
     const discussion_response = await octokit.request('GET /repos/{owner}/{repo}', {
         owner: _owner,
         repo: _repo,
     });
-    
-    let discussions : boolean = discussion_response['data']['has_discussions'];
+
+    let discussions: boolean = discussion_response['data']['has_discussions'];
 
     const issues_response = await octokit.request('GET /repos/{owner}/{repo}/issues', {
         owner: _owner,
@@ -328,21 +293,20 @@ export async function getAdherence(_owner:string, _repo:string): Promise<boolean
     let closed_at_date;
     let last_10_issues_time = 0;
     const current_date = new Date();
-    let responsiveness : boolean;
-    let adherence : boolean;
+    let responsiveness: boolean;
+    let adherence: boolean;
 
     // Loop through most recent 10 issues and calculate how long it took to be resolved
-    for( let i = 0; i < 10; i++ )
-    {
-        if(issues_response['data'][i] == undefined) {
-        break;
+    for (let i = 0; i < 10; i++) {
+        if (issues_response['data'][i] == undefined) {
+            break;
         }
 
-        if(issues_response['data'][i].closed_at == null) {
-        closed_at_date = current_date;
+        if (issues_response['data'][i].closed_at == null) {
+            closed_at_date = current_date;
         }
         else {
-        closed_at_date = new Date(issues_response['data'][i].closed_at!);
+            closed_at_date = new Date(issues_response['data'][i].closed_at!);
         }
 
         let created_at_date = new Date(issues_response['data'][i].created_at);
@@ -354,7 +318,7 @@ export async function getAdherence(_owner:string, _repo:string): Promise<boolean
     let avg_resp_time = last_10_issues_time / 10;
     avg_resp_time /= 3600000 * 24;
 
-    if(avg_resp_time <= 30) {
+    if (avg_resp_time <= 30) {
         responsiveness = true;
     }
     else {
@@ -371,8 +335,7 @@ export async function getAdherence(_owner:string, _repo:string): Promise<boolean
     return adherence;
 }
 
-export async function getVersionNumber(_owner:string, _repo: string)
-{
+export async function getVersionNumber(_owner: string, _repo: string) {
     const response = await octokit.request('GET /repos/{owner}/{repo}', {
         owner: _owner,
         repo: _repo,

@@ -17,7 +17,7 @@ import { fileURLToPath } from 'url';
 import * as sqlite3 from "sqlite3";
 import { version } from 'os';
 
-const db = new sqlite3.Database('modules.db')
+const db = new sqlite3.Database('./data/modules.db')
 
 // example: array of URLs --> assuming we read in the input file as strings
 //let urlArray : string[] = [ "www.mockurl1.com", "www.pretendurl.com", "www.testingurl.com" ];

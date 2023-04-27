@@ -65,7 +65,7 @@ if [ "$LOG_LEVEL" = "0" ]; then
         echo "3 dependencies installed..."
 
     elif [ "$1" = "build" ]; then
-        tsc main.ts --outDir ./js/
+        tsc ./src/ts/main.ts --outDir ./js/
 
         echo "Successfully built."
 
@@ -136,7 +136,7 @@ elif [ "$LOG_LEVEL" = "1" ]; then
         echo "3 dependencies installed..."
 
     elif [ "$1" = "build" ]; then
-        tsc main.ts --outDir ./js/
+        tsc ./src/ts/main.ts --outDir ./js/
 
         echo "Successfully built."
 
@@ -207,7 +207,7 @@ elif [ "$LOG_LEVEL" = "2" ]; then
         echo "3 dependencies installed..."
 
     elif [ "$1" = "build" ]; then
-        tsc main.ts --outDir ./js/
+        tsc ./src/ts/main.ts --outDir ./js/
 
         echo "Successfully built."
 
