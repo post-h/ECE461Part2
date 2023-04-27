@@ -2,10 +2,7 @@
 /node_modules/*
 /out/*
 logs.txt
-sample_url.txt
-convertedURLs.txt
 package-lock.json
 package.json
 /environment
-*.txt
 *.log
