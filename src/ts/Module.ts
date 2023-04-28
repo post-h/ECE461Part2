@@ -46,9 +46,9 @@ export class Module {
         return this.url;
     }
 
-    calcRampUpScore() {
-        this.rampUp.score = this.rampUp.calcMetric();
-        return this.rampUp;
+    async calcRampUpScore() {
+        this.rampUp.score = await this.rampUp.calcMetric();
+        // return this.rampUp;
     }
 
     async calcCorrectnessScore() {
@@ -78,8 +78,7 @@ export class Module {
 
     async calcNetScore() // might have to make this call and await each metric, and then calculate the weighted sum
     {
-        this.netScore = (this.adherence.score + this.licensing.score + this.versionPinning.score +
-            this.responsiveness.score + this.rampUp.score + this.busFactor.score + this.correctness.score) / 7;
+        this.netScore = (this.adherence.score + this.licensing.score + this.rampUp.score + this.versionPinning.score +
+            this.responsiveness.score + this.busFactor.score + this.correctness.score) / 7;
     }
-
 }

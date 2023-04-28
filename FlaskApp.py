@@ -1,5 +1,5 @@
 from flask import Flask, request, redirect, render_template, send_from_directory, session, jsonify, abort
-from validate_email import validate_email
+# from validate_email import validate_email
 import sqlite3
 import secrets
 
