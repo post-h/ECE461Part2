@@ -124,9 +124,9 @@ async function ingestibility() {
         }
     }
 
-    // for (var module in moduleArray) {
-    //     console.log("{\"URL\":\"%s\", \"NET_SCORE\":%s, \"RAMP_UP_SCORE\":%s, \"CORRECTNESS_SCORE\":-1, \"BUS_FACTOR\":%s, \"RESPONSIVE_MAINTAINER_SCORE\":%s, \"LICENSE_SCORE\":%s}", initialURLArray[module], moduleArray[module].netScore.toFixed(2), moduleArray[module].rampUpScore.toFixed(2), moduleArray[module].busFactor.score.toFixed(2), moduleArray[module].responsiveness.score.toFixed(2), moduleArray[module].licensing.score.toFixed(2)); 
-    // }
+    for (var module in moduleArray) {
+        console.log("{\"URL\":\"%s\", \"NET_SCORE\":%s, \"RAMP_UP_SCORE\":%s, \"CORRECTNESS_SCORE\":%s, \"BUS_FACTOR\":%s, \"RESPONSIVE_MAINTAINER_SCORE\":%s, \"LICENSE_SCORE\":%s, \"ADHERENCE_SCORE\":%s, \"VERSION_PINNING_SCORE\":%s}", initialURLArray[module], moduleArray[module].netScore.toFixed(2), moduleArray[module].rampUp.score.toFixed(2), moduleArray[module].correctness.score.toFixed(2), moduleArray[module].busFactor.score.toFixed(2), moduleArray[module].responsiveness.score.toFixed(2), moduleArray[module].licensing.score.toFixed(2), moduleArray[module].adherence.score.toFixed(2), moduleArray[module].versionPinning.score.toFixed(2)); 
+    }
     
     // newly added code (i'm not sure if it will be cleaner if we add it in GatherData.ts tho still a little confused)
     // to be tested

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Flask RESTful API Example</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  </head>
+  <body>
+    <h1>Flask RESTful API Example</h1>
+    <form id="add-item-form">
+      <label for="item">Item:</label>
+      <input type="text" id="item" name="item">
+      <button type="submit">Add Item</button>
+    </form>
+    <ul id="item-list"></ul>
+    <script>
+      $(document).ready(function() {
+        // Retrieve the list of items
+        $.getJSON('/api/items', function(data) {
+          var items = data.items;
+          for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            $('#item-list').append('<li>' + item + '</li>');
+          }
+        });
+
+        // Add a new item
+        $('#add-item-form').submit(function(event) {
+          event.preventDefault();
+          var item = $('#item').val();
+          $.ajax({
+            type: 'POST',
+            url: '/api/items',
+            data: JSON.stringify({'item': item}),
+            contentType: 'application/json',
+            success: function(data) {
+              $('#item-list').append('<li>' + data.item + '</li>');
+              $('#item').val('');
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

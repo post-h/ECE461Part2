@@ -35,7 +35,7 @@ function conductRampUp(url : string): number {
     spawnSync('git', ['clone', url, './clone']);
 
     // Run cloc on directory and create cloc_output.sql SQL database file with stdout of cloc
-    const cloc_out = spawnSync('perl', ['cloc-1.96.pl', '--sql', '1', './clone']);
+    const cloc_out = spawnSync('perl', ['./src/pl/cloc-1.96.pl', '--sql', '1', './clone']);
 
     //console.log(cloc_out.stdout.toString());
 
@@ -57,8 +57,9 @@ function conductRampUp(url : string): number {
 
     // +(string) converts string into number format 
     // i.e. turns string "5" into number 5
-    var CodeSum : number = +(split_str[0]);
-    var CommentSum : number = +(split_str[1]);
+    var CodeSum : number = parseInt(split_str[0]);
+    var CommentSum : number = parseInt(split_str[1]);
+
     //var markdownSum : number = +(stdout_markdown.stdout.toString());
 
     // Subtract markdown sum from code and add to comments to account for REAME.md files
@@ -67,7 +68,8 @@ function conductRampUp(url : string): number {
 
 
     // Create ratio between comments and code
-    var ratio : number = CommentSum / CodeSum;
+    let ratio : number = CommentSum / CodeSum;
+    // console.log(isNaN(ratio));
 
     // Remove cloned directory
     spawnSync('rm', ['-rf', './clone']);
