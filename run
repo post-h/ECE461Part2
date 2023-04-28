@@ -70,7 +70,7 @@ if [ "$LOG_LEVEL" = "0" ]; then
         echo "Successfully built."
 
     elif [ "$1" = "test" ]; then
-        tsc ./src/ts/tests.ts --outDir ./js/
+        tsc ./src/ts/test.ts --outDir ./js/
         node ./js/test.js
 
 
@@ -141,7 +141,7 @@ elif [ "$LOG_LEVEL" = "1" ]; then
         echo "Successfully built."
 
     elif [ "$1" = "test" ]; then
-        tsc ./src/ts/tests.ts --outDir ./js/
+        tsc ./src/ts/test.ts --outDir ./js/
         node ./js/test.js
 
 
@@ -212,7 +212,7 @@ elif [ "$LOG_LEVEL" = "2" ]; then
         echo "Successfully built."
 
     elif [ "$1" = "test" ]; then
-        tsc ./src/ts/tests.ts --outDir ./js/
+        tsc ./src/ts/test.ts --outDir ./js/
         node ./js/test.js
 
 
