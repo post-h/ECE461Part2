@@ -77,8 +77,9 @@ async function calcScores(curModule : Module) {
               }
         });
 
-    const sql2 = 'INSERT INTO modules (Name, Version, ID) VALUES (?, ?, ?)';
-    db.run(sql2, [curModule.repo, 0, curModule.repo]) // NEED to put in the version number
+    const sql2 = 'INSERT INTO modules (Name, Version, ID, url) VALUES (?, ?, ?, ?)';
+    let repo_name = (curModule.repo).charAt(0).toUpperCase() + curModule.repo.slice(1);
+    db.run(sql2, [repo_name, 0, curModule.repo, curModule.url]) // NEED to put in the version number
 
     db.close()
 }

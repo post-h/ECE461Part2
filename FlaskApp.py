@@ -6,6 +6,8 @@ import re
 from flask_httpauth import HTTPTokenAuth
 import jwt
 import datetime
+import requests
+import base64
 
 app = Flask(__name__)
 app.secret_key = '4gPM<+8;Nwe7ayZ_'
@@ -126,10 +128,49 @@ def getPackages():
         results.append({"Version": module[1], "Name": module[0], "ID": module[2]})
 
     return json.dumps(results)
+
+@app.route('/package/<id>', methods=['GET', 'PUT', 'DELETE'])
+def returnPackage(id):
+    conn = sqlite3.connect('./data/modules.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM modules WHERE ID = ?', (id,))
+    module = cursor.fetchone()
+
+    if request.method == 'GET':
+        if module is None:
+            abort(404)
+        url = module[3]
+        owner = url.split('/')[3]
+        repo = url.split('/')[4]
+
+        response = requests.get(f'https://api.github.com/repos/{owner}/{repo}/releases/latest')
+        
+        zip_url = response.json()['zipball_url']
+        
+        response_zip = requests.get(zip_url)
+        encoded_package_data = response.content
+        base64_data = base64.b64encode(encoded_package_data)
+        data_string = base64_data.decode('utf-8')
+        return data_string
+
+    if request.method == 'DELETE':
+        if module is not None:
+            if id in module:
+                cursor.execute('DELETE FROM modules WHERE ID = ?', (id,)) 
+                conn.commit()
+                conn.close()
+                data = {'message': 'Success!'}
+                return jsonify(data), 200
+            else:
+                abort(404)
+        else:
+            abort(400)
+    
         
 ## AUTHENTICATION IS A BITCH AND I HATE CLASSES
-# @app.route('/authenticate', methods=['PUT'])
-# def strReturn():
+@app.route('/authenticate', methods=['PUT'])
+def strReturn():
+    return 501
 #     user = request.json['User']
 #     secret = request.json['Secret']
 #     correct_user = 'ece30861defaultadminuser'
