@@ -810,7 +810,22 @@ legend {
   box-sizing: border-box;
 }
 
-.s004 {
+.search {
+  min-height: 100vh;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+      justify-content: center;
+  -ms-flex-align: center;
+      align-items: center;
+  font-family: 'Poppins', sans-serif;
+  background: url("../images/axolotl.png");
+  background-size: contain;
+  background-position: center center;
+  padding: 15px;
+}
+
+.directory {
   min-height: 100vh;
   display: -ms-flexbox;
   display: flex;
@@ -979,4 +994,14 @@ legend {
 .s004 form .pageButtonText:hover {
   color:#FC6666
 }
+
+.s004 form .scroll-box {
+  background: #C9DFE4;
+  border: 2px solid #BBD7DD;
+  border-radius: 10px;
+  height: 400px;
+  padding: 15px;
+  overflow-y: scroll;
+}
+
 
