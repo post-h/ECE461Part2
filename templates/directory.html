@@ -1,0 +1,32 @@
+<html>
+  <head>
+    <title>Current Directory</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="author" content="colorlib.com">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:400,800" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="/static/images/icons/directory.ico"/>
+    <link href="/static/css/mainSearch.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="s004 directory">
+      <form>
+        <fieldset>
+          <legend>Current Directory</legend>
+          <div class="pageButton">
+            <a href="./searchBar.html" class="pageButtonText">Search</a>
+            <a href="./searchBar.html" class="pageButtonText">Current Directory</a>
+            <a href="./searchBar.html" class="pageButtonText">Reset Directory</a>
+            <a href="./register.html" class="pageButtonText">Sign Out</a>
+          </div>
+          <div class="scroll-box">
+            <p>{{ text | safe}}</p>
+          </div>
+          <em style="display: block; text-align: center;">The above textbox displays the current directory results.</em>
+        </fieldset>
+      </form>
+    </div>
+    <script src="/static/js/extention/choices.js"></script>
+  </body>
+</html>
