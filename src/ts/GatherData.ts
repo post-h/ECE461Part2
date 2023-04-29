@@ -170,21 +170,29 @@ export async function calcMaintainers(_owner: string, _repo: string): Promise<nu
     }
 
     // Assign preliminary score based on number of maintainers
-    if (num_good_contributors > 0 && num_good_contributors < 5) {
+    // METRIC MODIFIED BY TEAM 15!
+    // .8 score given to good contributors # above 7, based on research that 7 is the ideal SWE team size
+    if (num_good_contributors > 0 && num_good_contributors <= 1) {
         score = 0;
     }
-    else if (num_good_contributors > 4 && num_good_contributors < 10) {
-        score = 0.2;
+    else if (num_good_contributors > 1 && num_good_contributors <= 3) {
+        score = 0.2; 
     }
-    else if (num_good_contributors > 9 && num_good_contributors < 15) {
-        score = 0.4;
+    else if (num_good_contributors > 3 && num_good_contributors <= 5) {
+        score = 0.4; 
     }
-    else if (num_good_contributors > 14 && num_good_contributors < 20) {
+    else if (num_good_contributors > 5 && num_good_contributors <= 6) {
         score = 0.6;
     }
-    else {
+    else  { //if (num_good_contributors > 6) {
         score = 0.8;
     }
+    // else if (num_good_contributors > 14 && num_good_contributors < 20) {
+    //     score = 0.7;
+    // }
+    // else {
+    //     score = 0.8;
+    // }
 
     // Request info on repo
     const discussion_response = await octokit.request('GET /repos/{owner}/{repo}', {
@@ -277,7 +285,7 @@ export async function getVersionPinning(_owner: string, _repo: string): Promise<
     return packageVersion !== undefined;
 }
 
-export async function getAdherence(_owner: string, _repo: string): Promise<boolean> {
+export async function getAdherence(_owner: string, _repo: string): Promise<number> {
     const discussion_response = await octokit.request('GET /repos/{owner}/{repo}', {
         owner: _owner,
         repo: _repo,
@@ -294,7 +302,7 @@ export async function getAdherence(_owner: string, _repo: string): Promise<boole
     let last_10_issues_time = 0;
     const current_date = new Date();
     let responsiveness: boolean;
-    let adherence: boolean;
+    let adherence: number = 0;
 
     // Loop through most recent 10 issues and calculate how long it took to be resolved
     for (let i = 0; i < 10; i++) {
@@ -318,7 +326,7 @@ export async function getAdherence(_owner: string, _repo: string): Promise<boole
     let avg_resp_time = last_10_issues_time / 10;
     avg_resp_time /= 3600000 * 24;
 
-    if (avg_resp_time <= 30) {
+    if (avg_resp_time <= 45) {
         responsiveness = true;
     }
     else {
@@ -326,10 +334,16 @@ export async function getAdherence(_owner: string, _repo: string): Promise<boole
     }
 
     if (discussions && responsiveness) {
-        adherence = true;
+        adherence = 1;
+    }
+    else if (discussions) {
+        adherence = 0.5;
+    }
+    else if (responsiveness) {
+        adherence = 0.5;
     }
     else {
-        adherence = false;
+        adherence = 0;
     }
 
     return adherence;

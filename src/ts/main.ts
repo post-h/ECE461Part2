@@ -147,6 +147,9 @@ async function ingestibility() {
         } else if((moduleArray[module].versionPinning.score.toFixed(2) as unknown as number) < 0.5) {
             moduleArray[module].ingestible = -1;
         }
+        else {
+            moduleArray[module].ingestible = -1;
+        }
     }
     
     // end code
