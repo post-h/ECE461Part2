@@ -13,11 +13,7 @@ export class Adherence implements Metric {
 }
 
 async function calc(owner: string, repo: string): Promise<number> {
-    let adherenceBool: boolean = await getAdherence(owner, repo);
-    let score: number = 0; //defaults false
-    if (adherenceBool) {
-        score = 1;
-    }
+    let adherence: number = await getAdherence(owner, repo);
 
-    return score;
+    return adherence;
 }
