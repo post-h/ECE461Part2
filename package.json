@@ -2,6 +2,7 @@
   "dependencies": {
     "cloc": "^2.11.0",
     "jquery": "^3.6.4",
+    "lodash": "^4.17.21",
     "minimist": "^1.2.7",
     "octokit": "^2.0.14",
     "sqlite3": "^5.1.6",

@@ -170,14 +170,14 @@ def returnPackage(id):
     elif request.method == 'PUT':
         if module is not None:
             if id in module:
-                data = request.data
+                data = request.get_json()
                 version = data['metadata']['Version']
                 cursor.execute('UPDATE modules SET Version = ? WHERE ID = ?', (version, id,))
                 conn.commit()
                 conn.close()
-                subprocess.run['npm', 'install', f"{id}@{version}"]
+                subprocess.run(['npm', 'install', f"{id}@{version}"])
                 retMessage ={'message': 'Success, package updated!'}
-                return json(retMessage), 200
+                return jsonify(retMessage), 200
             else:
                 return jsonify({'error': 'Invalid credentials, try again.'}), 400
         else:
