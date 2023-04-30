@@ -8,6 +8,7 @@ import jwt
 import datetime
 import requests
 import base64
+import subprocess
 
 app = Flask(__name__)
 app.secret_key = '4gPM<+8;Nwe7ayZ_'
@@ -153,18 +154,34 @@ def returnPackage(id):
         data_string = base64_data.decode('utf-8')
         return data_string
 
-    if request.method == 'DELETE':
+    elif request.method == 'DELETE':
         if module is not None:
             if id in module:
                 cursor.execute('DELETE FROM modules WHERE ID = ?', (id,)) 
                 conn.commit()
                 conn.close()
-                data = {'message': 'Success!'}
+                data = {'message': 'Success, package deleted!'}
                 return jsonify(data), 200
             else:
                 abort(404)
         else:
             abort(400)
+    
+    elif request.method == 'PUT':
+        if module is not None:
+            if id in module:
+                data = request.data
+                version = data['metadata']['Version']
+                cursor.execute('UPDATE modules SET Version = ? WHERE ID = ?', (version, id,))
+                conn.commit()
+                conn.close()
+                subprocess.run['npm', 'install', f"{id}@{version}"]
+                retMessage ={'message': 'Success, package updated!'}
+                return json(retMessage), 200
+            else:
+                return jsonify({'error': 'Invalid credentials, try again.'}), 400
+        else:
+            return jsonify({'error': 'Package does not exist'}), 404
     
         
 ## AUTHENTICATION IS A BITCH AND I HATE CLASSES
