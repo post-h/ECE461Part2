@@ -67,21 +67,21 @@ async function calcScores(curModule : Module) {
         versionPinning : curModule.versionPinning,
     };
     
-    const sql = 'INSERT INTO ratings (ID, BusFactor, Correctness, RampUp, LicenseScore, GoodPinning, PullRequest, NetScore) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-    db.run(sql, [curModule.repo, curModule.busFactor, curModule.correctness,
-        curModule.rampUp, curModule.licensing, curModule.versionPinning, curModule.adherence, curModule.netScore], function(err) {
-            if (err) {
-                console.error(err.message);
-              } else {
-                console.log(`Inserted row with id ${this.lastID}`);
-              }
-        });
+    // const sql = 'INSERT INTO ratings (ID, BusFactor, Correctness, RampUp, LicenseScore, GoodPinning, PullRequest, NetScore) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+    // db.run(sql, [curModule.repo, curModule.busFactor.score, curModule.correctness.score,
+    //     curModule.rampUp.score, curModule.licensing.score, curModule.versionPinning.score, curModule.adherence.score, curModule.netScore], function(err) {
+    //         if (err) {
+    //             console.error(err.message);
+    //           } else {
+    //             console.log(`Inserted row with id ${this.lastID}`);
+    //           }
+    //     });
 
-    const sql2 = 'INSERT INTO modules (Name, Version, ID, url) VALUES (?, ?, ?, ?)';
-    let repo_name = (curModule.repo).charAt(0).toUpperCase() + curModule.repo.slice(1);
-    db.run(sql2, [repo_name, 0, curModule.repo, curModule.url]) // NEED to put in the version number
+    // const sql2 = 'INSERT INTO modules (Name, Version, ID, url) VALUES (?, ?, ?, ?)';
+    // let repo_name = (curModule.repo).charAt(0).toUpperCase() + curModule.repo.slice(1);
+    // db.run(sql2, [repo_name, 0, curModule.repo, curModule.url]) // NEED to put in the version number
 
-    db.close()
+    // db.close()
 }
 
 // then for each module, we go through calculating each score
@@ -168,11 +168,29 @@ async function ingestibility() {
     const outputFile = 'outputIngestible.txt';
 
     for (var module in moduleArray) {
-        let full_string: string = moduleArray[module].owner + " " + moduleArray[module].repo + " " + moduleArray[module].ingestible.toString() + '\n';
-        fs.appendFile(outputFile, full_string, (err) => {
-            if (err) throw err;
-        });
+        const sql = 'INSERT INTO ratings (ID, BusFactor, Correctness, RampUp, LicenseScore, GoodPinning, PullRequest, NetScore) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+        db.run(sql, [moduleArray[module].repo, moduleArray[module].busFactor.score, moduleArray[module].correctness.score,
+            moduleArray[module].rampUp.score, moduleArray[module].licensing.score, moduleArray[module].versionPinning.score, moduleArray[module].adherence.score, moduleArray[module].netScore], function(err) {
+                if (err) {
+                    console.error(err.message);
+                } else {
+                    console.log(`Inserted row with id ${this.lastID}`);
+                }
+            });
+
+        const sql2 = 'INSERT INTO modules (Name, Version, ID, url) VALUES (?, ?, ?, ?)';
+        let repo_name = (moduleArray[module].repo).charAt(0).toUpperCase() + moduleArray[module].repo.slice(1);
+        db.run(sql2, [repo_name, 0, moduleArray[module].repo, moduleArray[module].url]) // NEED to put in the version number
     }
+    db.close()
+
+
+    // for (var module in moduleArray) {
+    //     let full_string: string = moduleArray[module].owner + " " + moduleArray[module].repo + " " + moduleArray[module].ingestible.toString() + '\n';
+    //     fs.appendFile(outputFile, full_string, (err) => {
+    //         if (err) throw err;
+    //     });
+    // }
     
     
     // let ingestOut : string;
@@ -187,6 +205,7 @@ async function ingestibility() {
 
 async function main() {
     await ingestibility();
+    // await calcScores(moduleArray[0]);
     // let ingestible : number = await ingestibility();
     // return ingestible 
 
