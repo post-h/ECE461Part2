@@ -9,6 +9,7 @@ import datetime
 import requests
 import base64
 import subprocess
+import zipfile
 
 app = Flask(__name__)
 app.secret_key = '4gPM<+8;Nwe7ayZ_'
@@ -18,13 +19,199 @@ auth = HTTPTokenAuth(scheme='Bearer')
 def index():
     return render_template('login.html')
 
-@app.route('/templates/register.html')
-def routeRegister():
-    return redirect('/register')
+@app.route('/packages', methods=['POST'])
+def getPackages():
+    pattern = r'\((.*?)\)'
+    data = json.loads(request.data)
+    print(data)
+    versions = data['Version']
+    versions = re.findall(pattern, versions)
+    
+    conn = sqlite3.connect('./data/modules.db')
+    c = conn.cursor()
 
-@app.route('/templates/login.html')
-def routeLogin():
-    return redirect('/login')
+    c.execute('SELECT * FROM modules WHERE Version IN ({seq})'.format(seq=','.join(['?']*len(versions))), versions)
+    modules = c.fetchall()
+    print(modules)
+    print(len(modules))
+
+    results = []
+    if (len(modules) < 30):
+        if modules is not None:
+            for module in modules:
+                results.append({"Version": module[1], "Name": module[0], "ID": module[2]})
+                return json.dumps(results), 200
+            # if module not in modules:
+            #     return jsonify({'error': 'Invalid credentials, try again.'}), 400
+        else:
+            return jsonify({'error': 'Invalid credentials, try again.'}), 400
+    else:
+        return jsonify({'error': 'Too many packages, try again.'}), 413
+
+
+@app.route('/reset', methods=['DELETE'])
+def reset():
+    conn = sqlite3.connect('./data/modules.db')
+    c = conn.cursor()
+
+    c.execute('TRUNCATE modules')
+    c.execute('TRUNCATE ratings')
+    conn.commit()
+    conn.close()
+    return jsonify({'message': 'Success, registry reset.'}), 200
+    
+@app.route('/package/<id>', methods=['GET', 'PUT', 'DELETE'])
+def returnPackage(id):
+    conn = sqlite3.connect('./data/modules.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM modules WHERE ID = ?', (id,))
+    module = cursor.fetchone()
+
+    if request.method == 'GET':
+        if module is None:
+            return jsonify({'error': 'Package does not exist, try again.'}), 404
+        url = module[3]
+        owner = url.split('/')[3]
+        repo = url.split('/')[4]
+
+        response = requests.get(f'https://api.github.com/repos/{owner}/{repo}/releases/latest')
+        if response is None:
+            return jsonify({'error': 'Invalid credentials, try again'}), 400
+        
+        zip_url = response.json()['zipball_url']
+        response_zip = requests.get(zip_url)
+        encoded_package_data = response.content
+        base64_data = base64.b64encode(encoded_package_data)
+        data_string = base64_data.decode('utf-8')
+        return jsonify(data_string), 200
+
+    elif request.method == 'DELETE':
+        if module is not None:
+            if id in module:
+                cursor.execute('DELETE FROM modules WHERE ID = ?', (id,)) 
+                conn.commit()
+                conn.close()
+                return jsonify({'message': 'Success, package deleted!'}), 200
+            else:
+                return jsonify({'error': 'Invalid credentials, try again.'}), 404
+        else:
+            return jsonify({'error': 'Package does not exist, try again.'}), 400
+    
+    elif request.method == 'PUT':
+        if module is not None:
+            if id in module:
+                data = request.get_json()
+                version = data['metadata']['Version']
+                cursor.execute('UPDATE modules SET Version = ? WHERE ID = ?', (version, id,))
+                conn.commit()
+                conn.close()
+                subprocess.run(['npm', 'install', f"{id}@{version}"])
+                retMessage ={'message': 'Success, package updated!'}
+                return jsonify(retMessage), 200
+            else:
+                return jsonify({'error': 'Invalid credentials, try again.'}), 400
+        else:
+            return jsonify({'error': 'Package does not exist'}), 404
+
+@app.route('/package', methods=['POST'])
+def packageUpload():
+    
+    if request.method == 'POST':
+        data = request.get_json()
+        if 'Content' in data and 'URL' in data:
+            return jsonify({'error': 'Invalid entry, both content and url cannot be set, try again.'}), 400
+        elif 'URL' in data:
+            url = data['URL']
+            owner = url.split('/')[3]
+            repo = url.split('/')[4]
+            
+            process = subprocess.run(['./run', './url.txt'])
+            exit_code = process.wait()
+
+            with open('url.txt', 'w') as fp:
+                fp.write(url)
+
+            conn = sqlite3.connect('./data/modules.db')
+            c = conn.cursor()
+            c.execute('SELECT * FROM ratings where ID = ?', (repo,))
+            repo_info = c.fetchone()
+
+            if repo_info is not None:
+                abort(409) # Package exists
+            
+            print(repo_info)
+            c.execute('SELECT Version FROM modules where ID = ?', (repo,))
+            version = c.fetchone()[0]
+
+            for i in repo_info:
+                if i < 0.5:
+                    # abort(424)
+                    return jsonify({'error': 'Package not uploaded due to disqualifying rating. Try a different package.'}), 424
+
+            response = requests.get(f'https://api.github.com/repos/{owner}/{repo}/releases/latest')
+            if response is None:
+                return jsonify({'error': 'Invalid credentials, try again'}), 400
+        
+            zip_url = response.json()['zipball_url']
+            response_zip = requests.get(zip_url)
+            encoded_package_data = response.content
+            base64_data = base64.b64encode(encoded_package_data)
+            data_string = base64_data.decode('utf-8')
+            response_return = {"metadata": {"Name": repo.capitalize(), "Version": version, "ID": repo}, "data": {"Content": data_string}}
+            return jsonify(response_return), 201
+        elif 'Content' in data:
+            # Get the base64-encoded zip file from the request
+            data = request.data
+            zip_file_b64 = data['Content']
+
+            # Decode the base64-encoded zip file
+            zip_file_bytes = base64.b64decode(zip_file_b64)
+
+            # Read the contents of package.json from the zip file
+            with zipfile.ZipFile(zip_file_bytes) as zip_file:
+                package_json_bytes = zip_file.read('package.json')
+                package_json_str = package_json_bytes.decode('utf-8')
+
+            # Extract the value of the 'url' field from package.json
+            package_json = json.loads(package_json_str)
+            if 'repository' in package_json:
+                url = package_json['repository']['url']
+                owner = url.split('/')[3]
+                repo = url.split('/')[4]
+                
+                with open('url.txt', 'w') as fp:
+                    fp.write(url)
+                
+                subprocess.run(['node', 'main.ts', 'url.txt'])
+                conn = sqlite3.connect('./data/modules.db')
+                c = conn.cursor() 
+                c.execute('SELECT * FROM modules where ID = ?', (repo,))
+                repo_info = c.fetchall()
+                response_data = {{"metadata": {"Name": repo_info[0], "Version": repo_info[1], "ID": repo_info[2]}}}
+                subprocess.run(['npm', 'install', repo])
+                return jsonify(response_data), 201
+            else:
+                abort(400)
+
+@app.route('/package/<id>/rate', methods=['GET'])
+def packageRating(id):
+    conn = sqlite3.connect('./data/modules.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM ratings where ID = ?', (id,))
+    ratings = cursor.fetchall()
+    
+    if request.method == 'GET':
+        if ratings is not None:
+            if (len(ratings) == 8):
+                for rating in ratings:
+                    results = {"ID": ratings[0], "BusFactor": ratings[1], "Correctness": ratings[2], "RampUp": ratings[3],
+                                    "ResponsiveMaintainer": ratings[4], "LicenseScore": ratings[4], "GoodPinningPractice": ratings[5],
+                                    "PullRequest": ratings[6], "NetScore": ratings[7]}
+                    return json.dumps(results), 200
+            else:
+                return jsonify({'error': 'The package rating system choked on at least one of the metrics.'}), 500
+        else:
+            return jsonify({'error': 'Package does not exist.'}), 404
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -60,9 +247,9 @@ def login():
         conn.close()
         return render_template('login.html')
 
-@app.errorhandler(401)
-def invalidCredential(error):
-    return render_template('login.html', error_message='Incorrect password, please try again.')
+# @app.errorhandler(401)
+# def invalidCredential(error):
+#     return render_template('login.html', error_message='Incorrect password, please try again.')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -109,79 +296,6 @@ def search():
     else:
         error_message = 'You must be logged in to access this page.'
         return render_template('login.html', error_message=error_message)
-
-@app.route('/packages', methods=['POST'])
-def getPackages():
-    pattern = r'\((.*?)\)'
-    data = json.loads(request.data)
-    print(data)
-    versions = data['Version']
-    versions = re.findall(pattern, versions)
-    
-    conn = sqlite3.connect('./data/modules.db')
-    c = conn.cursor()
-
-    c.execute('SELECT * FROM modules WHERE Version IN ({seq})'.format(seq=','.join(['?']*len(versions))), versions)
-    modules = c.fetchall()
-
-    results = []
-    for module in modules:
-        results.append({"Version": module[1], "Name": module[0], "ID": module[2]})
-
-    return json.dumps(results)
-
-@app.route('/package/<id>', methods=['GET', 'PUT', 'DELETE'])
-def returnPackage(id):
-    conn = sqlite3.connect('./data/modules.db')
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM modules WHERE ID = ?', (id,))
-    module = cursor.fetchone()
-
-    if request.method == 'GET':
-        if module is None:
-            abort(404)
-        url = module[3]
-        owner = url.split('/')[3]
-        repo = url.split('/')[4]
-
-        response = requests.get(f'https://api.github.com/repos/{owner}/{repo}/releases/latest')
-        
-        zip_url = response.json()['zipball_url']
-        
-        response_zip = requests.get(zip_url)
-        encoded_package_data = response.content
-        base64_data = base64.b64encode(encoded_package_data)
-        data_string = base64_data.decode('utf-8')
-        return data_string
-
-    elif request.method == 'DELETE':
-        if module is not None:
-            if id in module:
-                cursor.execute('DELETE FROM modules WHERE ID = ?', (id,)) 
-                conn.commit()
-                conn.close()
-                data = {'message': 'Success, package deleted!'}
-                return jsonify(data), 200
-            else:
-                abort(404)
-        else:
-            abort(400)
-    
-    elif request.method == 'PUT':
-        if module is not None:
-            if id in module:
-                data = request.get_json()
-                version = data['metadata']['Version']
-                cursor.execute('UPDATE modules SET Version = ? WHERE ID = ?', (version, id,))
-                conn.commit()
-                conn.close()
-                subprocess.run(['npm', 'install', f"{id}@{version}"])
-                retMessage ={'message': 'Success, package updated!'}
-                return jsonify(retMessage), 200
-            else:
-                return jsonify({'error': 'Invalid credentials, try again.'}), 400
-        else:
-            return jsonify({'error': 'Package does not exist'}), 404
     
         
 ## AUTHENTICATION IS A BITCH AND I HATE CLASSES
