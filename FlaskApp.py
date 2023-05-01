@@ -15,38 +15,60 @@ app = Flask(__name__)
 app.secret_key = '4gPM<+8;Nwe7ayZ_'
 auth = HTTPTokenAuth(scheme='Bearer')
 
+
 @app.route('/')
 def index():
     return render_template('login.html')
+
+
+@app.route('/templates/home.html')
+def reroute():
+    return redirect('/')
+
 
 @app.route('/packages', methods=['POST'])
 def getPackages():
     pattern = r'\((.*?)\)'
     data = json.loads(request.data)
-    print(data)
-    versions = data['Version']
+    versions = data[0]['Version']
     versions = re.findall(pattern, versions)
-    
+
     conn = sqlite3.connect('./data/modules.db')
     c = conn.cursor()
 
-    c.execute('SELECT * FROM modules WHERE Version IN ({seq})'.format(seq=','.join(['?']*len(versions))), versions)
+    c.execute('SELECT * FROM modules WHERE Version IN ({seq})'.format(
+        seq=','.join(['?']*len(versions))), versions)
     modules = c.fetchall()
-    print(modules)
-    print(len(modules))
 
     results = []
     if (len(modules) < 30):
         if modules is not None:
             for module in modules:
-                results.append({"Version": module[1], "Name": module[0], "ID": module[2]})
-                return json.dumps(results), 200
+                results.append(
+                    {"Version": module[1], "Name": module[0], "ID": module[2]})
+
+            data = json.dumps(results)
+            # return jsonify(data).json
+            if request.headers.get('Accept') == 'application/json':
+                return jsonify(data).json, 200
+            else:
+                return render_template('success.html', content=jsonify({'message': 'To search for packages, please make the appropriate request via API calls.'}).json)
+
+            # return render_template('success.html', results=jsonify(data).json), 200
             # if module not in modules:
             #     return jsonify({'error': 'Invalid credentials, try again.'}), 400
         else:
-            return jsonify({'error': 'Invalid credentials, try again.'}), 400
+            if request.headers.get('Accept') == 'application/json':
+                return jsonify({'error': 'Invalid credentials, try again.'}), 400
+            else:
+                return render_template('error.html', content=jsonify({'error': 'Invalid credentials, try again.'}).json)
+            # return render_template('error.html', jsonify({'error': 'Invalid credentials, try again.'})), 400
     else:
-        return jsonify({'error': 'Too many packages, try again.'}), 413
+        # return render_template('error.html', jsonify({'error': 'Too many packages, try again.'})), 413
+        if request.headers.get('Accept') == 'application/json':
+            return jsonify({'error': 'Too many packages, try again.'}), 413
+        else:
+            return render_template('error.html', content='Too many packages, try again.')
 
 
 @app.route('/reset', methods=['DELETE'])
@@ -58,8 +80,18 @@ def reset():
     c.execute('DELETE FROM ratings')
     conn.commit()
     conn.close()
-    return jsonify({'message': 'Success, registry reset.'}), 200
-    
+    # return render_template('success.html', jsonify({'message': 'Success, registry reset.'})), 200
+    if request.headers.get('Accept') == 'application/json':
+        return jsonify({'message': 'Success, registry reset.'}), 200
+    else:
+        return render_template('success.html', content='Success, registry reset.')
+
+####################################################################################################################################
+# NOTE2SELF:
+# come back to render requests
+####################################################################################################################################
+
+
 @app.route('/package/<id>', methods=['GET', 'PUT', 'DELETE'])
 def returnPackage(id):
     conn = sqlite3.connect('./data/modules.db')
@@ -69,96 +101,151 @@ def returnPackage(id):
 
     if request.method == 'GET':
         if module is None:
-            return jsonify({'error': 'Package does not exist, try again.'}), 404
+            # return render_template('error.html', content=jsonify({'error': 'Package does not exist, try again.'})), 404
+            if request.headers.get('Accept') == 'application/json':
+                return jsonify({'error': 'Package does not exist, try again.'}), 404
+            else:
+                return render_template('error.html', content='Package does not exist, try again.')
         url = module[3]
         owner = url.split('/')[3]
         repo = url.split('/')[4]
 
-        response = requests.get(f'https://api.github.com/repos/{owner}/{repo}/releases/latest')
+        response = requests.get(
+            f'https://api.github.com/repos/{owner}/{repo}/releases/latest')
         if response is None:
-            return jsonify({'error': 'Invalid credentials, try again'}), 400
-        
+            if request.headers.get('Accept') == 'application/json':
+                return jsonify({'error': 'Invalid credentials, try again'}), 400
+            else:
+                return render_template('error.html', jsonify({'error': 'Invalid credentials, try again'})), 400
+
         zip_url = response.json()['zipball_url']
         response_zip = requests.get(zip_url)
         encoded_package_data = response.content
         base64_data = base64.b64encode(encoded_package_data)
         data_string = base64_data.decode('utf-8')
-        return jsonify(data_string), 200
+        if request.headers.get('Accept') == 'application/json':
+            return jsonify(data_string), 200
+        else:
+            return render_template('success.html', content='Success. Package found')
 
     elif request.method == 'DELETE':
         if module is not None:
             if id in module:
-                cursor.execute('DELETE FROM modules WHERE ID = ?', (id,)) 
+                cursor.execute('DELETE FROM modules WHERE ID = ?', (id,))
                 conn.commit()
                 conn.close()
-                return jsonify({'message': 'Success, package deleted!'}), 200
+                if request.headers.get('Accept') == 'application/json':
+                    return jsonify({'message': 'Success, registry reset.'}), 200
+                else:
+                    return render_template('success.html', content=jsonify({'message': 'Success, registry reset.'}).json)
+                # return render_template('success.html', jsonify({'message': 'Success, package deleted!'})), 200
             else:
-                return jsonify({'error': 'Invalid credentials, try again.'}), 404
+                # return render_template('error.html', jsonify({'error': 'Invalid credentials, try again.'})), 404
+                if request.headers.get('Accept') == 'application/json':
+                    return jsonify({'error': 'Invalid credentials, try again.'}), 404
+                else:
+                    return render_template('error.html', content=jsonify({'error': 'Invalid credentials, try again.'}).json)
         else:
-            return jsonify({'error': 'Package does not exist, try again.'}), 400
-    
+            # return render_template('error.html', jsonify({'error': 'Package does not exist, try again.'})), 400
+            if request.headers.get('Accept') == 'application/json':
+                return jsonify({'error': 'Package does not exist, try again.'}), 400
+            else:
+                return render_template('error.html', content=jsonify({'error': 'Package does not exist, try again.'}).json)
+
     elif request.method == 'PUT':
         if module is not None:
             if id in module:
                 data = request.get_json()
                 version = data['metadata']['Version']
-                cursor.execute('UPDATE modules SET Version = ? WHERE ID = ?', (version, id,))
+                cursor.execute(
+                    'UPDATE modules SET Version = ? WHERE ID = ?', (version, id,))
                 conn.commit()
                 conn.close()
                 subprocess.run(['npm', 'install', f"{id}@{version}"])
-                retMessage ={'message': 'Success, package updated!'}
-                return jsonify(retMessage), 200
+                retMessage = {'message': 'Success, package updated!'}
+                # return render_template('success.html', jsonify(retMessage)), 200
+                if request.headers.get('Accept') == 'application/json':
+                    return jsonify(retMessage), 200
+                else:
+                    return render_template('success.html', content=jsonify(retMessage).json)
             else:
-                return jsonify({'error': 'Invalid credentials, try again.'}), 400
+                # return render_template('error.html', jsonify({'error': 'Invalid credentials, try again.'})), 400
+                if request.headers.get('Accept') == 'application/json':
+                    return jsonify({'error': 'Invalid credentials, try again.'}), 400
+                else:
+                    return render_template('error.html', content=jsonify({'error': 'Invalid credentials, try again.'}).json)
         else:
-            return jsonify({'error': 'Package does not exist'}), 404
+            # return render_template('error.html', jsonify({'error': 'Package does not exist'})), 404
+            if request.headers.get('Accept') == 'application/json':
+                return jsonify({'error': 'Package does not exist, try again.'}), 404
+            else:
+                return render_template('error.html', content=jsonify({'error': 'Package does not exist, try again.'}).json)
+
 
 @app.route('/package', methods=['POST'])
 def packageUpload():
-    
+
     if request.method == 'POST':
         data = request.get_json()
         if 'Content' in data and 'URL' in data:
-            return jsonify({'error': 'Invalid entry, both content and url cannot be set, try again.'}), 400
+            # return render_template('package.html', jsonify({'error': 'Invalid entry, both content and url cannot be set, try again.'})), 400
+            if request.headers.get('Accept') == 'application/json':
+                return jsonify({'error': 'Invalid entry, both content and url cannot be set, try again.'}), 400
+            else:
+                return render_template('error.html', content=jsonify({'error': 'Invalid entry, both content and url cannot be set, try again.'}).json)
         elif 'URL' in data:
             url = data['URL']
             owner = url.split('/')[3]
             repo = url.split('/')[4]
-        
+
             conn = sqlite3.connect('./data/modules.db')
             c = conn.cursor()
             c.execute('SELECT * FROM ratings where ID = ?', (repo,))
             repo_info = c.fetchone()
 
             if repo_info is not None:
-                abort(409) # Package exists
+                # return render_template('error.html', jsonify({'error': 'Package already exists, try again.'})), 409
+                if request.headers.get('Accept') == 'application/json':
+                    return jsonify({'error': 'Package already exists, try again.'}), 409
+                else:
+                    return render_template('error.html', content=jsonify({'error': 'Package already exists, try again.'}).json)
+                # abort(409) # Package exists
 
             with open('url.txt', 'w') as fp:
                 fp.write(url)
-            
+
             subprocess.run(['./run', './url.txt'])
-            
+
             c.execute('SELECT * FROM ratings where ID = ?', (repo,))
             repo_info = c.fetchone()
             c.execute('SELECT Version FROM modules where ID = ?', (repo,))
             version = c.fetchone()[0]
 
-
             for idx, score in enumerate(repo_info):
                 if idx > 0 and score < 0.5:
                     # abort(424)
-                    return jsonify({'error': 'Package not uploaded due to disqualifying rating. Try a different package.'}), 424
-
+                    # return render_template('package.html', jsonify({'error': 'Package not uploaded due to disqualifying rating. Try a different package.'})), 424
+                    if request.headers.get('Accept') == 'application/json':
+                        return jsonify({'error': 'Package not uploaded due to disqualifying rating. Try a different package.'}), 424
+                    else:
+                        return render_template('error.html', content=jsonify({'error': 'Package not uploaded due to disqualifying rating. Try a different package.'}).json)
             response = requests.get(f'https://api.github.com/repos/{owner}/{repo}/releases/latest')
             if response is None:
-                return jsonify({'error': 'Invalid credentials, try again'}), 400
-        
+                # return jsonify({'error': 'Invalid credentials, try again'}), 400
+                if request.headers.get('Accept') == 'application/json':
+                    return jsonify({'error': 'Invalid credentials, try again.'}), 400
+                else:
+                    return render_template('error.html', content=jsonify({'error': 'Invalid credentials, try again.'}).json)
+                
+            response = requests.get(f'https://api.github.com/repos/{owner}/{repo}/releases/latest')
+
             zip_url = response.json()['zipball_url']
             response_zip = requests.get(zip_url)
             encoded_package_data = response.content
             base64_data = base64.b64encode(encoded_package_data)
             data_string = base64_data.decode('utf-8')
-            response_return = {"metadata": {"Name": repo.capitalize(), "Version": version, "ID": repo}, "data": {"Content": data_string}}
+            response_return = {"metadata": {"Name": repo.capitalize(
+            ), "Version": version, "ID": repo}, "data": {"Content": data_string}}
             return jsonify(response_return), 201
         elif 'Content' in data:
             # Get the base64-encoded zip file from the request
@@ -179,20 +266,31 @@ def packageUpload():
                 url = package_json['repository']['url']
                 owner = url.split('/')[3]
                 repo = url.split('/')[4]
-                
+
                 with open('url.txt', 'w') as fp:
                     fp.write(url)
-                
+
                 subprocess.run(['node', 'main.ts', 'url.txt'])
                 conn = sqlite3.connect('./data/modules.db')
-                c = conn.cursor() 
+                c = conn.cursor()
                 c.execute('SELECT * FROM modules where ID = ?', (repo,))
                 repo_info = c.fetchall()
                 response_data = {{"metadata": {"Name": repo_info[0], "Version": repo_info[1], "ID": repo_info[2]}}}
                 subprocess.run(['npm', 'install', repo])
-                return jsonify(response_data), 201
+                # return jsonify(response_data), 201
+                if request.headers.get('Accept') == 'application/json':
+                    return jsonify(response_data), 201
+                else:
+                    return render_template('success.html', content=jsonify({'message': 'Successful package upload.'}).json)  ##CHECK DIS
+                ### WHAT IS THE INDENTATION EVERYTHING KEEPS GETTING FUCKED IM CONFUSED THIS IS IN CAPS SO I DONT GET SIDE TRACKED AND FORGET
+                # response = requests.get(f'https://api.github.com/repos/{owner}/{repo}/releases/latest')
             else:
-                abort(400)
+                # abort(400)
+                if request.headers.get('Accept') == 'application/json':
+                    return jsonify({'error': 'Invalid credentials, try again.'}), 400
+                else:
+                    return render_template('error.html', content=jsonify({'error': 'Invalid credentials, try again.'}).json)
+
 
 @app.route('/package/<id>/rate', methods=['GET'])
 def packageRating(id):
@@ -209,13 +307,26 @@ def packageRating(id):
             if (len(ratings) == 8):
                 for rating in ratings:
                     results = {"BusFactor": ratings[0], "Correctness": ratings[1], "RampUp": ratings[2],
-                                    "ResponsiveMaintainer": ratings[3], "LicenseScore": ratings[4], "GoodPinningPractice": ratings[5],
-                                    "PullRequest": ratings[6], "NetScore": ratings[7]}
-                    return json.dumps(results), 200
+                               "ResponsiveMaintainer": ratings[3], "LicenseScore": ratings[4], "GoodPinningPractice": ratings[5],
+                               "PullRequest": ratings[6], "NetScore": ratings[7]}
+                    # return json.dumps(results), 200
+                    if request.headers.get('Accept') == 'application/json':
+                        return jsonify(results), 200
+                    else:
+                        return render_template('success.html', content=jsonify({'message': 'Successful ratings request.'}).json) ##bruh idk (note2self)
             else:
-                return jsonify({'error': 'The package rating system choked on at least one of the metrics.'}), 500
+                # return jsonify({'error': 'The package rating system choked on at least one of the metrics.'}), 500
+                if request.headers.get('Accept') == 'application/json':
+                    return jsonify({'error': 'Package rating system choked on at least one metric, try again.'}), 500
+                else:
+                    return render_template('error.html', content=jsonify({'error': 'Package system choked on at least one metric, try again.'}).json)
         else:
-            return jsonify({'error': 'Package does not exist.'}), 404
+            # return jsonify({'error': 'Package does not exist.'}), 404
+            if request.headers.get('Accept') == 'application/json':
+                return jsonify({'error': 'Package does not exist.'}), 404
+            else:
+                return render_template('error.html', content=jsonify({'error': 'Package does not exist.'}).json)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -225,7 +336,7 @@ def login():
 
     c.execute('''CREATE TABLE IF NOT EXISTS Users
             (name TEXT, isAdmin BOOL, password TEXT)''')
-    
+
     if request.method == 'POST':
         username = request.form['email']
         password = request.form['password']
@@ -255,6 +366,7 @@ def login():
 # def invalidCredential(error):
 #     return render_template('login.html', error_message='Incorrect password, please try again.')
 
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
 
@@ -280,17 +392,18 @@ def register():
             conn.close()
             return render_template('login.html', error_message=error_message)
         else:
-            cursor.execute("INSERT INTO Users (name, isAdmin, password) VALUEs (?, ?, ?)", (username, False, password))
+            cursor.execute(
+                "INSERT INTO Users (name, isAdmin, password) VALUEs (?, ?, ?)", (username, False, password))
             session['username'] = username
             conn.commit()
             conn.close()
-            return redirect('/search') 
+            return redirect('/search')
 
     else:
         conn.commit()
-        conn.close()  
+        conn.close()
         return render_template('register.html')
-        
+
 
 @app.route('/search')
 def search():
@@ -300,9 +413,9 @@ def search():
     else:
         error_message = 'You must be logged in to access this page.'
         return render_template('login.html', error_message=error_message)
-    
-        
-## AUTHENTICATION IS A BITCH AND I HATE CLASSES
+
+
+# AUTHENTICATION IS A BITCH AND I HATE CLASSES
 @app.route('/authenticate', methods=['PUT'])
 def strReturn():
     return 501
@@ -313,7 +426,7 @@ def strReturn():
 #     print(user['isAdmin'])
 #     if ((user['name'] == correct_user) and user['isAdmin'] and (secret['password'] == correct_password)):
 #         # print('hi')
-#         payload = { 
+#         payload = {
 #             "sub": correct_user,
 #             "exp": datetime.datetime.utcnow() + datetime.timedelta(days=1)
 #         }

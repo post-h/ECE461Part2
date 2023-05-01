@@ -1,32 +1,63 @@
 <html>
-  <head>
-    <title>Current Directory</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="author" content="colorlib.com">
-    <link href="https://fonts.googleapis.com/css?family=Poppins:400,800" rel="stylesheet" />
-    <link rel="icon" type="image/png" href="/static/images/icons/directory.ico"/>
-    <link href="/static/css/mainSearch.css" rel="stylesheet" />
-  </head>
-  <body>
-    <div class="s004 directory">
-      <form>
-        <fieldset>
-          <legend>Current Directory</legend>
-          <div class="pageButton">
-            <a href="./searchBar.html" class="pageButtonText">Search</a>
-            <a href="./searchBar.html" class="pageButtonText">Current Directory</a>
-            <a href="./searchBar.html" class="pageButtonText">Reset Directory</a>
-            <a href="./register.html" class="pageButtonText">Sign Out</a>
-          </div>
-          <div class="scroll-box">
-            <p>{{ text | safe}}</p>
-          </div>
-          <em style="display: block; text-align: center;">The above textbox displays the current directory results.</em>
-        </fieldset>
-      </form>
-    </div>
-    <script src="/static/js/extention/choices.js"></script>
-  </body>
+
+<head>
+  <title>Current Directory</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="author" content="colorlib.com">
+  <link href="https://fonts.googleapis.com/css?family=Poppins:400,800" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="/static/images/icons/directory.ico" />
+  <link href="/static/css/mainSearch.css" rel="stylesheet" />
+</head>
+
+<body>
+  <div class="s004 directory">
+    <form>
+      <fieldset>
+        <legend>Search Results</legend>
+        <div class="pageButton">
+          <a href="./searchBar.html" class="pageButtonText">Search</a>
+          <a href="./searchBar.html" class="pageButtonText">Current Directory</a>
+          <a href="./searchBar.html" class="pageButtonText">Reset Directory</a>
+          <a href="./register.html" class="pageButtonText">Sign Out</a>
+        </div>
+        <div>
+          <table id="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Version</th>
+                <th>ID</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+          <script>
+            var data = content;
+            var table = document.getElementById("data-table");
+
+            for (var i = 0; i < data.length; i++) {
+              var row = table.insertRow(i + 1);
+              var value1Cell = row.insertCell(0);
+              var value2Cell = row.insertCell(1);
+              var value3Cell = row.insertCell(2);
+
+              value1Cell.innerHTML = data[i][0];
+              value2Cell.innerHTML = data[i][1];
+              value3Cell.innerHTML = data[i][2];
+            }
+          </script>
+        </div>
+        <div class="scroll-box">
+          <p>{{ text | safe}}</p>
+        </div>
+        <em style="display: block; text-align: center;">The above textbox displays the current directory results.</em>
+      </fieldset>
+    </form>
+  </div>
+  <script src="/static/js/extention/choices.js"></script>
+</body>
+
 </html>
