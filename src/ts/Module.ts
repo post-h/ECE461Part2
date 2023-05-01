@@ -7,6 +7,14 @@ import { Responsiveness } from "./Responsiveness";
 import { Licensing } from "./Licensing"
 import { Adherence } from "./Adherence";
 import { VersionPinning } from "./VersionPinning";
+import { Octokit } from "octokit";
+
+const octokit = new Octokit({
+    auth: process.env.GITHUB_TOKEN,
+    userAgent: 'testing',
+    timeZone: "Eastern",
+    baseUrl: 'https://api.github.com',
+});
 
 export class Module {
     // private instance variables
@@ -22,6 +30,7 @@ export class Module {
     adherence: Adherence;
     versionPinning: VersionPinning;
     ingestible: number;
+    versionNumber: string;
 
 
     // constructor
@@ -80,5 +89,14 @@ export class Module {
     {
         this.netScore = (this.adherence.score + this.licensing.score + this.rampUp.score + this.versionPinning.score +
             this.responsiveness.score + this.busFactor.score + this.correctness.score) / 7;
+    }
+
+    async calcVersion() {
+        const response = await octokit.request('GET /repos/{owner}/{repo}/releases/latest', {
+            owner: this.owner,
+            repo: this.repo,
+        });
+    
+        this.versionNumber = response.data.tag_name;
     }
 }

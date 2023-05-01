@@ -54,8 +54,8 @@ def reset():
     conn = sqlite3.connect('./data/modules.db')
     c = conn.cursor()
 
-    c.execute('TRUNCATE modules')
-    c.execute('TRUNCATE ratings')
+    c.execute('DELETE FROM modules')
+    c.execute('DELETE FROM ratings')
     conn.commit()
     conn.close()
     return jsonify({'message': 'Success, registry reset.'}), 200
@@ -124,13 +124,7 @@ def packageUpload():
             url = data['URL']
             owner = url.split('/')[3]
             repo = url.split('/')[4]
-            
-            process = subprocess.run(['./run', './url.txt'])
-            exit_code = process.wait()
-
-            with open('url.txt', 'w') as fp:
-                fp.write(url)
-
+        
             conn = sqlite3.connect('./data/modules.db')
             c = conn.cursor()
             c.execute('SELECT * FROM ratings where ID = ?', (repo,))
@@ -138,13 +132,20 @@ def packageUpload():
 
             if repo_info is not None:
                 abort(409) # Package exists
+
+            with open('url.txt', 'w') as fp:
+                fp.write(url)
             
-            print(repo_info)
+            subprocess.run(['./run', './url.txt'])
+            
+            c.execute('SELECT * FROM ratings where ID = ?', (repo,))
+            repo_info = c.fetchone()
             c.execute('SELECT Version FROM modules where ID = ?', (repo,))
             version = c.fetchone()[0]
 
-            for i in repo_info:
-                if i < 0.5:
+
+            for idx, score in enumerate(repo_info):
+                if idx > 0 and score < 0.5:
                     # abort(424)
                     return jsonify({'error': 'Package not uploaded due to disqualifying rating. Try a different package.'}), 424
 
@@ -198,14 +199,17 @@ def packageRating(id):
     conn = sqlite3.connect('./data/modules.db')
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM ratings where ID = ?', (id,))
-    ratings = cursor.fetchall()
-    
+    query_response = cursor.fetchall()
+    unrounded = query_response[0][1:]
+    ratings = [round(f, 2) for f in unrounded]
+
+    print(ratings)
     if request.method == 'GET':
         if ratings is not None:
             if (len(ratings) == 8):
                 for rating in ratings:
-                    results = {"ID": ratings[0], "BusFactor": ratings[1], "Correctness": ratings[2], "RampUp": ratings[3],
-                                    "ResponsiveMaintainer": ratings[4], "LicenseScore": ratings[4], "GoodPinningPractice": ratings[5],
+                    results = {"BusFactor": ratings[0], "Correctness": ratings[1], "RampUp": ratings[2],
+                                    "ResponsiveMaintainer": ratings[3], "LicenseScore": ratings[4], "GoodPinningPractice": ratings[5],
                                     "PullRequest": ratings[6], "NetScore": ratings[7]}
                     return json.dumps(results), 200
             else:
