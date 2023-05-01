@@ -6,8 +6,8 @@ on:
       - main
 
 env:
-  PROJECT_ID: your-project-id
-  SERVICE_ACCOUNT_KEY: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+  PROJECT_ID: ece461-project-382522
+  SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SA_KEY }}
 
 jobs:
   deploy:
@@ -37,7 +37,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@master
         with:
           version: '340.0.0'
-          service_account_key: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
           project_id: ${{ env.PROJECT_ID }}
 
       - name: Deploy to Google Kubernetes Engine
