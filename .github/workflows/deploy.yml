@@ -1,0 +1,47 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  PROJECT_ID: your-project-id
+  SERVICE_ACCOUNT_KEY: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: false
+          tags: gcr.io/$PROJECT_ID/my-flask-app:${{ github.sha }}
+
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          version: '340.0.0'
+          service_account_key: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Deploy to Google Kubernetes Engine
+        run: |
+          gcloud config set project $PROJECT_ID
+          gcloud container clusters get-credentials my-cluster --zone us-central1-a --project $PROJECT_ID
+          kubectl apply -f deployment.yaml
