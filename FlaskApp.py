@@ -109,6 +109,8 @@ def returnPackage(id):
         url = module[3]
         owner = url.split('/')[3]
         repo = url.split('/')[4]
+        cursor.execute('SELECT Version FROM modules where ID = ?', (repo,))
+        version = cursor.fetchone()[0]
 
         response = requests.get(
             f'https://api.github.com/repos/{owner}/{repo}/releases/latest')
@@ -123,8 +125,9 @@ def returnPackage(id):
         encoded_package_data = response.content
         base64_data = base64.b64encode(encoded_package_data)
         data_string = base64_data.decode('utf-8')
+        response_return = {"metadata": {"Name": repo.capitalize(), "Version": version, "ID": repo}, "data": {"Content": data_string}}
         if request.headers.get('Accept') == 'application/json':
-            return jsonify(data_string), 200
+            return jsonify(response_return), 200
         else:
             return render_template('success.html', content='Success. Package found')
 
@@ -229,24 +232,25 @@ def packageUpload():
                         return jsonify({'error': 'Package not uploaded due to disqualifying rating. Try a different package.'}), 424
                     else:
                         return render_template('error.html', content=jsonify({'error': 'Package not uploaded due to disqualifying rating. Try a different package.'}).json)
-            response = requests.get(f'https://api.github.com/repos/{owner}/{repo}/releases/latest')
+            response = requests.get(
+                f'https://api.github.com/repos/{owner}/{repo}/releases/latest')
             if response is None:
                 # return jsonify({'error': 'Invalid credentials, try again'}), 400
                 if request.headers.get('Accept') == 'application/json':
                     return jsonify({'error': 'Invalid credentials, try again.'}), 400
                 else:
                     return render_template('error.html', content=jsonify({'error': 'Invalid credentials, try again.'}).json)
-                
-            response = requests.get(f'https://api.github.com/repos/{owner}/{repo}/releases/latest')
+
+            response = requests.get(
+                f'https://api.github.com/repos/{owner}/{repo}/releases/latest')
 
             zip_url = response.json()['zipball_url']
             response_zip = requests.get(zip_url)
             encoded_package_data = response.content
             base64_data = base64.b64encode(encoded_package_data)
             data_string = base64_data.decode('utf-8')
-            response_return = {"metadata": {"Name": repo.capitalize(
-            ), "Version": version, "ID": repo}, "data": {"Content": data_string}}
-            return jsonify(response_return), 201
+            response_return = {"metadata": {"Name": repo.capitalize(), "Version": version, "ID": repo}, "data": {"Content": data_string}}
+            return json.loads(response_return), 201
         elif 'Content' in data:
             # Get the base64-encoded zip file from the request
             data = request.data
@@ -275,14 +279,16 @@ def packageUpload():
                 c = conn.cursor()
                 c.execute('SELECT * FROM modules where ID = ?', (repo,))
                 repo_info = c.fetchall()
-                response_data = {{"metadata": {"Name": repo_info[0], "Version": repo_info[1], "ID": repo_info[2]}}}
+                response_data = {
+                    {"metadata": {"Name": repo_info[0], "Version": repo_info[1], "ID": repo_info[2]}}}
                 subprocess.run(['npm', 'install', repo])
                 # return jsonify(response_data), 201
                 if request.headers.get('Accept') == 'application/json':
                     return jsonify(response_data), 201
                 else:
-                    return render_template('success.html', content=jsonify({'message': 'Successful package upload.'}).json)  ##CHECK DIS
-                ### WHAT IS THE INDENTATION EVERYTHING KEEPS GETTING FUCKED IM CONFUSED THIS IS IN CAPS SO I DONT GET SIDE TRACKED AND FORGET
+                    # CHECK DIS
+                    return render_template('success.html', content=jsonify({'message': 'Successful package upload.'}).json)
+                # WHAT IS THE INDENTATION EVERYTHING KEEPS GETTING MOVED IM CONFUSED THIS IS IN CAPS SO I DONT GET SIDE TRACKED AND FORGET
                 # response = requests.get(f'https://api.github.com/repos/{owner}/{repo}/releases/latest')
             else:
                 # abort(400)
@@ -301,7 +307,6 @@ def packageRating(id):
     unrounded = query_response[0][1:]
     ratings = [round(f, 2) for f in unrounded]
 
-    print(ratings)
     if request.method == 'GET':
         if ratings is not None:
             if (len(ratings) == 8):
@@ -313,7 +318,8 @@ def packageRating(id):
                     if request.headers.get('Accept') == 'application/json':
                         return jsonify(results), 200
                     else:
-                        return render_template('success.html', content=jsonify({'message': 'Successful ratings request.'}).json) ##bruh idk (note2self)
+                        # bruh idk (note2self)
+                        return render_template('success.html', content=jsonify({'message': 'Successful ratings request.'}).json)
             else:
                 # return jsonify({'error': 'The package rating system choked on at least one of the metrics.'}), 500
                 if request.headers.get('Accept') == 'application/json':
@@ -328,97 +334,97 @@ def packageRating(id):
                 return render_template('error.html', content=jsonify({'error': 'Package does not exist.'}).json)
 
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
+# @app.route('/login', methods=['GET', 'POST'])
+# def login():
 
-    conn = sqlite3.connect('./data/users.db')
-    c = conn.cursor()
+#     conn = sqlite3.connect('./data/users.db')
+#     c = conn.cursor()
 
-    c.execute('''CREATE TABLE IF NOT EXISTS Users
-            (name TEXT, isAdmin BOOL, password TEXT)''')
+#     c.execute('''CREATE TABLE IF NOT EXISTS Users
+#             (name TEXT, isAdmin BOOL, password TEXT)''')
 
-    if request.method == 'POST':
-        username = request.form['email']
-        password = request.form['password']
+#     if request.method == 'POST':
+#         username = request.form['email']
+#         password = request.form['password']
 
-        c.execute("SELECT password FROM Users WHERE name=?", (username,))
-        result = c.fetchone()
+#         c.execute("SELECT password FROM Users WHERE name=?", (username,))
+#         result = c.fetchone()
 
-        if result and result[0] == password:
-            session['username'] = username
-            token = secrets.token_hex(32)
-            session['token'] = token
-            conn.commit()
-            conn.close()
-            redirect('/search')
-            return jsonify({'token': token})
-        else:
-            error = 'Invalid username or password'
-            conn.commit()
-            conn.close()
-            abort(401)
-    else:
-        conn.commit()
-        conn.close()
-        return render_template('login.html')
+#         if result and result[0] == password:
+#             session['username'] = username
+#             token = secrets.token_hex(32)
+#             session['token'] = token
+#             conn.commit()
+#             conn.close()
+#             redirect('/search')
+#             return jsonify({'token': token})
+#         else:
+#             error = 'Invalid username or password'
+#             conn.commit()
+#             conn.close()
+#             abort(401)
+#     else:
+#         conn.commit()
+#         conn.close()
+#         return render_template('login.html')
 
-# @app.errorhandler(401)
-# def invalidCredential(error):
-#     return render_template('login.html', error_message='Incorrect password, please try again.')
-
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-
-    conn = sqlite3.connect('./data/users.db')
-    c = conn.cursor()
-
-    c.execute('''CREATE TABLE IF NOT EXISTS Users
-            (name TEXT, isAdmin BOOL, password TEXT)''')
-
-    if request.method == 'POST':
-        username = request.form['email']
-        password = request.form['password']
-
-        conn = sqlite3.connect('./data/users.db')
-        cursor = conn.cursor()
-
-        cursor.execute('SELECT name FROM Users WHERE name = ?', (username,))
-        existing_user = cursor.fetchone()
-
-        if existing_user is not None:
-            error_message = 'Existing account found, please log in.'
-            conn.commit()
-            conn.close()
-            return render_template('login.html', error_message=error_message)
-        else:
-            cursor.execute(
-                "INSERT INTO Users (name, isAdmin, password) VALUEs (?, ?, ?)", (username, False, password))
-            session['username'] = username
-            conn.commit()
-            conn.close()
-            return redirect('/search')
-
-    else:
-        conn.commit()
-        conn.close()
-        return render_template('register.html')
+# # @app.errorhandler(401)
+# # def invalidCredential(error):
+# #     return render_template('login.html', error_message='Incorrect password, please try again.')
 
 
-@app.route('/search')
-def search():
-    render_template('searchBar.html')
-    if 'username' in session:
-        return 'Welcome, ' + session['username'] + '!'
-    else:
-        error_message = 'You must be logged in to access this page.'
-        return render_template('login.html', error_message=error_message)
+# @app.route('/register', methods=['GET', 'POST'])
+# def register():
+
+#     conn = sqlite3.connect('./data/users.db')
+#     c = conn.cursor()
+
+#     c.execute('''CREATE TABLE IF NOT EXISTS Users
+#             (name TEXT, isAdmin BOOL, password TEXT)''')
+
+#     if request.method == 'POST':
+#         username = request.form['email']
+#         password = request.form['password']
+
+#         conn = sqlite3.connect('./data/users.db')
+#         cursor = conn.cursor()
+
+#         cursor.execute('SELECT name FROM Users WHERE name = ?', (username,))
+#         existing_user = cursor.fetchone()
+
+#         if existing_user is not None:
+#             error_message = 'Existing account found, please log in.'
+#             conn.commit()
+#             conn.close()
+#             return render_template('login.html', error_message=error_message)
+#         else:
+#             cursor.execute(
+#                 "INSERT INTO Users (name, isAdmin, password) VALUEs (?, ?, ?)", (username, False, password))
+#             session['username'] = username
+#             conn.commit()
+#             conn.close()
+#             return redirect('/search')
+
+#     else:
+#         conn.commit()
+#         conn.close()
+#         return render_template('register.html')
 
 
-# AUTHENTICATION IS A BITCH AND I HATE CLASSES
+# @app.route('/search')
+# def search():
+#     render_template('searchBar.html')
+#     if 'username' in session:
+#         return 'Welcome, ' + session['username'] + '!'
+#     else:
+#         error_message = 'You must be logged in to access this page.'
+#         return render_template('login.html', error_message=error_message)
+
+
+
 @app.route('/authenticate', methods=['PUT'])
 def strReturn():
-    return 501
+    abort(501)
 #     user = request.json['User']
 #     secret = request.json['Secret']
 #     correct_user = 'ece30861defaultadminuser'
