@@ -232,18 +232,14 @@ def packageUpload():
                         return jsonify({'error': 'Package not uploaded due to disqualifying rating. Try a different package.'}), 424
                     else:
                         return render_template('error.html', content=jsonify({'error': 'Package not uploaded due to disqualifying rating. Try a different package.'}).json)
-            response = requests.get(
-                f'https://api.github.com/repos/{owner}/{repo}/releases/latest')
+            response = requests.get(f'https://api.github.com/repos/{owner}/{repo}/releases/latest')
             if response is None:
                 # return jsonify({'error': 'Invalid credentials, try again'}), 400
                 if request.headers.get('Accept') == 'application/json':
                     return jsonify({'error': 'Invalid credentials, try again.'}), 400
                 else:
                     return render_template('error.html', content=jsonify({'error': 'Invalid credentials, try again.'}).json)
-
-            response = requests.get(
-                f'https://api.github.com/repos/{owner}/{repo}/releases/latest')
-
+                
             zip_url = response.json()['zipball_url']
             response_zip = requests.get(zip_url)
             encoded_package_data = response.content
@@ -288,8 +284,6 @@ def packageUpload():
                 else:
                     # CHECK DIS
                     return render_template('success.html', content=jsonify({'message': 'Successful package upload.'}).json)
-                # WHAT IS THE INDENTATION EVERYTHING KEEPS GETTING MOVED IM CONFUSED THIS IS IN CAPS SO I DONT GET SIDE TRACKED AND FORGET
-                # response = requests.get(f'https://api.github.com/repos/{owner}/{repo}/releases/latest')
             else:
                 # abort(400)
                 if request.headers.get('Accept') == 'application/json':
