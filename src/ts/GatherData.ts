@@ -348,14 +348,3 @@ export async function getAdherence(_owner: string, _repo: string): Promise<numbe
 
     return adherence;
 }
-
-export async function getVersionNumber(_owner: string, _repo: string) {
-    const response = await octokit.request('GET /repos/{owner}/{repo}', {
-        owner: _owner,
-        repo: _repo,
-    });
-
-    let versionNum = Octokit.VERSION;
-
-    return versionNum;
-}

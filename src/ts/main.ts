@@ -109,6 +109,7 @@ async function ingestibility() {
         await moduleArray[module].calcLicensingScore();
         await moduleArray[module].calcAdherenceScore();
         await moduleArray[module].calcVersionPinningScore();
+        await moduleArray[module].calcVersion();
 
         // calcScores(moduleArray[module]);
 
@@ -168,9 +169,9 @@ async function ingestibility() {
     const outputFile = 'outputIngestible.txt';
 
     for (var module in moduleArray) {
-        const sql = 'INSERT INTO ratings (ID, BusFactor, Correctness, RampUp, LicenseScore, GoodPinning, PullRequest, NetScore) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+        const sql = 'INSERT INTO ratings (ID, BusFactor, Correctness, RampUp, ResponsiveMaintainer, LicenseScore, GoodPinningPractice, PullRequest, NetScore) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
         db.run(sql, [moduleArray[module].repo, moduleArray[module].busFactor.score, moduleArray[module].correctness.score,
-            moduleArray[module].rampUp.score, moduleArray[module].licensing.score, moduleArray[module].versionPinning.score, moduleArray[module].adherence.score, moduleArray[module].netScore], function(err) {
+            moduleArray[module].rampUp.score, moduleArray[module].responsiveness.score, moduleArray[module].licensing.score, moduleArray[module].versionPinning.score, moduleArray[module].adherence.score, moduleArray[module].netScore], function(err) {
                 if (err) {
                     console.error(err.message);
                 } else {
@@ -180,7 +181,7 @@ async function ingestibility() {
 
         const sql2 = 'INSERT INTO modules (Name, Version, ID, url) VALUES (?, ?, ?, ?)';
         let repo_name = (moduleArray[module].repo).charAt(0).toUpperCase() + moduleArray[module].repo.slice(1);
-        db.run(sql2, [repo_name, 0, moduleArray[module].repo, moduleArray[module].url]) // NEED to put in the version number
+        db.run(sql2, [repo_name, moduleArray[module].versionNumber, moduleArray[module].repo, moduleArray[module].url]) // NEED to put in the version number
     }
     db.close()
 
