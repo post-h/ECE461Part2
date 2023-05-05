@@ -3,8 +3,8 @@ from flask import Flask, request, redirect, render_template, send_from_directory
 import sqlite3
 import secrets
 import re
-from flask_httpauth import HTTPTokenAuth
-import jwt
+# from flask_httpauth import HTTPTokenAuth
+# import jwt
 import datetime
 import requests
 import base64
@@ -13,7 +13,7 @@ import zipfile
 
 app = Flask(__name__)
 app.secret_key = '4gPM<+8;Nwe7ayZ_'
-auth = HTTPTokenAuth(scheme='Bearer')
+# auth = HTTPTokenAuth(scheme='Bearer')
 
 
 @app.route('/')
@@ -251,6 +251,8 @@ def packageUpload():
             # Get the base64-encoded zip file from the request
             data = request.data
             zip_file_b64 = data['Content']
+            if len(zip_file_b64) == 0:
+                return jsonify({"message": "No content provided"}), 400
 
             # Decode the base64-encoded zip file
             zip_file_bytes = base64.b64decode(zip_file_b64)
@@ -313,7 +315,10 @@ def packageRating(id):
                         return jsonify(results), 200
                     else:
                         # bruh idk (note2self)
-                        return render_template('success.html', content=jsonify({'message': 'Successful ratings request.'}).json)
+                        results = {"BusFactor": ratings[0], "Correctness": ratings[1], "RampUp": ratings[2],
+                               "ResponsiveMaintainer": ratings[3], "LicenseScore": ratings[4], "GoodPinningPractice": ratings[5],
+                               "PullRequest": ratings[6], "NetScore": ratings[7]}
+                        return render_template('success.html', content=jsonify(results).json)
             else:
                 # return jsonify({'error': 'The package rating system choked on at least one of the metrics.'}), 500
                 if request.headers.get('Accept') == 'application/json':
@@ -418,7 +423,7 @@ def packageRating(id):
 
 @app.route('/authenticate', methods=['PUT'])
 def strReturn():
-    abort(501)
+    return jsonify({"message": "Not implemented."}), 501
 #     user = request.json['User']
 #     secret = request.json['Secret']
 #     correct_user = 'ece30861defaultadminuser'
