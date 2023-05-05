@@ -3,8 +3,8 @@ from flask import Flask, request, redirect, render_template, send_from_directory
 import sqlite3
 import secrets
 import re
-from flask_httpauth import HTTPTokenAuth
-import jwt
+# from flask_httpauth import HTTPTokenAuth
+# import jwt
 import datetime
 import requests
 import base64
@@ -13,7 +13,7 @@ import zipfile
 
 app = Flask(__name__)
 app.secret_key = '4gPM<+8;Nwe7ayZ_'
-auth = HTTPTokenAuth(scheme='Bearer')
+# auth = HTTPTokenAuth(scheme='Bearer')
 
 
 @app.route('/')
